@@ -246,8 +246,7 @@
      copy:
        src: /root/zabbixfiles/{{item}}
        dest: /usr/share/zabbix/
-      
-       remote_src: yes
+     remote_src: yes
      with_items:
        - charts-iframe.php
        - charts-iframe-logout.php

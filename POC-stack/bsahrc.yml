@@ -7,10 +7,7 @@
       private: no
     - name: Domainname
       prompt: what is Domian name
-      private: no   
-    # - name: ZABBIX_PVT_IP
-    #   prompt: what Zabbix Private Ip addresss
-    #   private: no   
+      private: no     
   tasks:
 
    - name: Install supporting Packages
@@ -34,13 +31,7 @@
        - Password-{{sqlservers}}-zabbix
        - Password-{{sqlservers}}-wolf
        - Password-{{sqlservers}}-monogo
-      #  - Password-{{sqlservers}}-rabbitmq
        - Password-{{sqlservers}}
-      #  - Password-{{Ipaddress.}}-pvtipZabbix
-      #  - Password-{{ZABBIX_PVT_IP}}-zabbixadmin
-      #  - Password-{{ZABBIX_PVT_IP}}-publicipZabbix
-
-      #  - bsahrc.txt
 
    - name: get the bsahrc 
      copy:
@@ -59,7 +50,7 @@
         - EncryptionUtil.java          
 
    - name: Generate the Zabbix Admin password
-     shell: openssl rand -base64 16
+     command: cat /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbixadmin
      register: zabbix_Admin_pass       
 
    - name: Get the password monogo details
@@ -83,20 +74,8 @@
      register: zabbix
 
    - name: Encrypted password
-     shell: java EncryptionUtil /JlTMql7TzmLpZ30N/jb7w==  bt/dLcRhhK/LYdTchNXxsQ== | head -n 1
+     shell: java EncryptionUtil {{zabbix_Admin_pass.stdout}}  bt/dLcRhhK/LYdTchNXxsQ== | head -n 1
      register: Encrypted_stack_bill     
-
-  #  - name: Get the password zabbix details
-  #    command: cat /root/Password-{{ZABBIX_PVT_IP.stdout}}-pvtipZabbix
-  #    register: pvtipZabbix
-
-  #  - name: Get the password zabbix details
-  #    command: cat /root/Password-{{ZABBIX_PVT_IP.stdout}}-publicipZabbix
-  #    register: zabbixadmin     
-
-  #  - name: Get the password zabbix details
-  #    command: cat /root/Password-{{ZABBIX_PVT_IP.stdout}}-zabbixadmin
-  #    register: publicipZabbix        
 
    - name: Get the Ip address
      command: cat /tmp/Password-{{sqlservers}}
@@ -111,7 +90,6 @@
        - {find: 'wolfpass', replace: '{{wolf.stdout}}' }
        - {find: 'wolfmonpass', replace: '{{monogo.stdout}}' }
        - {find: 'rabbitpass', replace: '{{rabbitpass.stdout}}' }
-       - {find: '10.61.61.250', replace: '{{ip.stdout}}' }
        - {find: '10.61.61.2', replace: '{{Ipaddress.stdout}}' }
        - {find: 'control.zehost.live', replace: '{{Domainname}}' }  
        - {find: '185.95.215.18', replace: '{{pubipaddress.stdout}}' }     
@@ -126,3 +104,16 @@
 
    - name: Password file
      shell: echo "{{Encrypted_stack_bill.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-Encrypted_stack_bill     
+
+   - name: Password file
+     shell: echo "{{Domainname}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-Domainname     
+
+
+   - name: Copy password file
+     fetch:
+        src: /root/Password-{{Ipaddress.stdout}}/{{item}}
+        dest: /root/
+        flat: yes
+     with_items:
+       - Password-{{Ipaddress.stdout}}-Encrypted_stack_bill 
+       - Password-{{Ipaddress.stdout}}-Domainname
