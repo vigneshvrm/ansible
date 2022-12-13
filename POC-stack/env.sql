@@ -1,4 +1,4 @@
-/* CREATE TABLE */
+/* CREATE TABLE Wolf*/
 CREATE TABLE IF NOT EXISTS `env_configurations`(
   `id` INT NOT NULL AUTO_INCREMENT,
   `keyname` VARCHAR(100),
@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS `env_configurations`(
 )ENGINE=InnoDB AUTO_INCREMENT=1;
 
 /* EMPTY TABLE */
+
 TRUNCATE TABLE `env_configurations`;
 
 /* MONGO CONFIG */
