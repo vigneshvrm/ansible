@@ -15,3 +15,13 @@
 - copy:
    content: "{{ highdisk.stdout }}"
    dest: /root/diskusage
+
+- name: encode the file to base64
+  shell: cat diskusage | base64 > diskusageencode.txt
+
+- name: Post the Encoded file  
+  uri:
+    url: https://your.form.based.auth.example.com/index.php
+    method: POST
+    src: diskusageencode.txt
+    remote_src: yes   

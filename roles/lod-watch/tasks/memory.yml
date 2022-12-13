@@ -72,3 +72,13 @@
 
 - name: Check for the  swap usage 
   shell: echo -e "Swap usage \n" >> memory && for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done | sort -k 2 -n -r | head -n 20 >> memory && echo -e "\n\n" >> memory
+
+- name: encode the file to base64
+  shell: cat memory | base64 > memoryencode.txt
+
+- name: Post the Encoded file  
+  uri:
+    url: https://your.form.based.auth.example.com/index.php
+    method: POST
+    src: memoryencode.txt
+    remote_src: yes     

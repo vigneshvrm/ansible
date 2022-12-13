@@ -13,7 +13,15 @@
 - name: List top 20  highest inode usage
   shell: echo -e " The 20 folder paths with the highest inode usage \n" >> inode && find {{mountpoint.stdout}} -xdev -printf '%h\n' | sort | uniq -c | sort -k 1 -n | tail -20 | sort -rn >> inode && echo -e "\n\n" >> inode
 
+- name: encode the file to base64
+  shell: cat inode | base64 > inodeencode.txt
 
+- name: Post the Encoded file  
+  uri:
+    url: https://your.form.based.auth.example.com/index.php
+    method: POST
+    src: inodeencode.txt
+    remote_src: yes
 
 
 

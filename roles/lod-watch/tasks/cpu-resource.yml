@@ -50,3 +50,14 @@
 
 - name: server Steal time
   shell: 	echo -e " Server Steal time  \n" >> load && top -bcn1 | awk 'NR==3 {print $16}'  >> load && echo -e "\n\n" >> load
+
+
+- name: encode the file to base64
+  shell: cat load | base64 > loadencode.txt
+
+- name: Post the Encoded file  
+  uri:
+    url: https://your.form.based.auth.example.com/index.php
+    method: POST
+    src: loadencode.txt
+    remote_src: yes
