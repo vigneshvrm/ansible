@@ -13,6 +13,11 @@
     #   private: no   
   tasks:
 
+   - name: Install supporting Packages
+     package:
+       name: java-11-openjdk-devel
+       state: present 
+
    - name: Get the server IP address
      command: curl http://checkip.amazonaws.com
      register: pubipaddress   
@@ -39,16 +44,15 @@
 
    - name: get the bsahrc 
      copy:
-       src: {{item}} 
+       src: "{{item}}"
        dest: /tmp/
      with_items:
        - bsahrc.txt
-       - EncryptionUtil.class
-       - EncryptionUtil.java   
+ 
 
    - name: get the java 
      copy:
-        src: {{item}} 
+        src: "{{item}}"
         dest: /root/
      with_items:
         - EncryptionUtil.class
@@ -79,7 +83,7 @@
      register: zabbix
 
    - name: Encrypted password
-     shell: java EncryptionUtil {{zabbix_stackbill_pass.stdout}}  bt/dLcRhhK/LYdTchNXxsQ==
+     shell: java EncryptionUtil /JlTMql7TzmLpZ30N/jb7w==  bt/dLcRhhK/LYdTchNXxsQ== | head -n 1
      register: Encrypted_stack_bill     
 
   #  - name: Get the password zabbix details
@@ -119,3 +123,6 @@
 
    - name: copy the content to bashrc    
      shell: cat /tmp/bsahrc.txt >> /root/.bashrc
+
+   - name: Password file
+     shell: echo "{{Encrypted_stack_bill.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-Encrypted_stack_bill     
