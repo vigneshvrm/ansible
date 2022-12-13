@@ -1,0 +1,21 @@
+---
+
+- name: check which Mount point reached 90% and above
+  shell: echo -e " The mount point Inode vale reached 90% \n" >> inode &&  df -i | grep "9[4-9][0-9]*"   >> inode && echo -e "\n\n" >> inode
+
+- name: Get the mount point
+  shell:  df -i | grep "9[4-9][0-9]*" | awk '{print $6}'
+  register: mountpoint
+
+- debug:
+    var: mountpoint.stdout_lines
+
+- name: List top 20  highest inode usage
+  shell: echo -e " The 20 folder paths with the highest inode usage \n" >> inode && find {{mountpoint.stdout}} -xdev -printf '%h\n' | sort | uniq -c | sort -k 1 -n | tail -20 | sort -rn >> inode && echo -e "\n\n" >> inode
+
+
+
+
+
+
+

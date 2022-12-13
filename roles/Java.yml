@@ -1,0 +1,79 @@
+- hosts: centos
+  become: yes
+  become_user: root
+  tasks:
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+
+   - name: Disable and Stop Firewall
+     service:
+       name: firewalld
+       state: Stopped
+       enabled: False
+     
+   - name: Install supporting Packages
+     package:
+       name:
+         - wget
+         - epel-release
+         - lsof
+         - nc
+         - telnet
+       state: present 
+    
+   - name: Download jdk-11
+     get_url:
+       url: https://sp-poc.s3.amazonaws.com/Java/jdk-11.0.15.1.tar.gz
+       dest: /opt
+
+   - name: Download jdk-8u
+     get_url:
+       url: https://sp-poc.s3.amazonaws.com/Java/jdk-8u221-linux-x64.tar.gz
+       dest: /opt
+
+   - name: Extract jdk-11 into /opt
+     unarchive:
+       src: /opt/jdk-11.0.15.1.tar.gz
+       dest: /opt
+
+   - name: Extract jdk-8u into /opt
+     unarchive:
+       src: /opt/jdk-8u221-linux-x64.tar.gz
+       dest: /opt
+
+   - name: Create a java.sh file
+     file:
+       path: /etc/profile.d/java.sh
+       state: touch
+       mode: x+rw
+
+   - name: Add the script in the file
+     lineinfile:
+       path: /etc/profile.d/java.sh
+       line: "{{ item }}"
+     with_items:
+       - #!/bin/bash
+       - JAVA_HOME=/opt/jdk1.8.0_221/
+       - PATH=$JAVA_HOME/bin:$PATH
+       - export PATH JAVA_HOME
+       - export CLASSPATH=.
+
+   - name: Execute the java script
+     command: sh /etc/profile.d/java.sh
+
+   - name: Set variables
+     command: source /etc/profile.d/java.sh
+
+   - name: Create a symbolic
+     file:
+       src: /opt/jdk1.8.0_221/bin/java
+       dest: /usr/bin/java
+       state: link
+
+   - name:  View java version
+     command: java -version
+     register: java
+    
+   - debug:
+       msg: '{{java.stdout_lines}}'

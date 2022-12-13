@@ -1,0 +1,19 @@
+---
+# vars file for mysql-phpyamdin
+
+# Mysql new passowrd
+
+mysql_root_password: Yln^S2X3WoC67&W0
+
+# Add server IP address
+
+ipaddress: "{{Ipaddress.stdout}}"
+
+phpmyadmin_config_file: /etc/phpMyAdmin/config.inc.php
+
+phpmyadmin_mysql_host: localhost
+phpmyadmin_mysql_port: ""
+phpmyadmin_mysql_socket: ""
+phpmyadmin_mysql_connect_type: tcp
+phpmyadmin_mysql_user: root
+phpmyadmin_mysql_password: "{{ mysql_root_password }}"

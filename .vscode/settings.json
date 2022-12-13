@@ -1,0 +1,15 @@
+{
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/ansible/schemas/main/f/ansible.json#/$defs/tasks": "file:///c%3A/Users/Vignesh/Documents/TEST%20Code/roles/loadwatch-cpanel/tasks/server-details.yml"
+    },
+    "github.codespaces.defaultExtensions": [
+    
+        "GitHub.codespaces",
+        "GitHub.vscode-pull-request-github"
+    ],
+    "githubPullRequests.remotes": [
+        "origin",
+        "upstream",
+        "master"
+    ]
+}

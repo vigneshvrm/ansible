@@ -1,0 +1,118 @@
+# ansible-galaxy collection install community.postgresql
+
+- hosts: centos3
+  become: yes
+  become_user: root
+  tasks:
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+
+   - name: Get the server IP address
+     command: curl http://checkip.amazonaws.com
+     register: pubipaddress    
+
+   - name: Get the server IP address
+     shell: hostname -I | awk '{print $1}'
+     register: Ipaddress   
+
+   - name: Generate the postgr user password
+     shell:  cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo
+     register: postgr_user_pass      
+
+   - name: clean packages
+     command: yum clean all
+
+   - name: install requried POSTGRESSQL
+     yum: 
+       name: 
+          - zip
+          - unzip
+          - libicu
+          - python-psycopg2 
+       state: present
+
+   - name: copy the postgresql repo
+     copy:
+       src: pgdg11.zip
+       dest: /tmp/
+
+   - name: copy the postgresql repo
+     copy:
+       src: pgdg11.repo
+       dest: /etc/yum.repos.d/
+
+   - name: copy the postgresql repo
+     unarchive:      
+       src: /tmp/pgdg11.zip
+       dest: /etc/yum.repos.d/
+       remote_src: yes
+
+  #  - name: install POSTGRESSQL
+  #    yum: 
+  #      name: 
+  #         - https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+  #         - postgresql11-server
+  #      state: present
+
+   - name: install POSTGRESSQL
+     command: yum install --disablerepo="*" --enablerepo=OurRepo postgresql11-server -y
+
+   - name: initdb postgresql
+     command: /usr/pgsql-11/bin/postgresql-11-setup initdb
+
+   - name: Start and enable service
+     ansible.builtin.service:
+        name: postgresql-11
+        state: started
+        enabled: true
+
+   - name: Replace the mongo details
+     command: sed -i  's/ident/trust/' /var/lib/pgsql/11/data/pg_hba.conf
+
+   - name: Replace the mongo details
+     command: sed -E -i 's/local(\s+)all(\s+)all(\s+)peer/local\1all\2all\3trust/' /var/lib/pgsql/11/data/pg_hba.conf
+
+   - name: Start and enable service
+     ansible.builtin.service:
+        name: postgresql-11
+        state: restarted
+
+   - name: Create a new user with name "kong"
+     postgresql_user:
+        name: kong
+        password: "{{postgr_user_pass}}"
+
+
+   - name: Create a new database with name "kong"
+     postgresql_db:
+        name: kong
+        owner: kong
+
+   - name: Create a new user with name "kong"
+     postgresql_privs:
+        db: kong
+        role: kong
+        type: database
+        priv: ALL
+
+   - name: Create a directory
+     file:
+       path: /root/Password-{{Ipaddress.stdout}}
+       state: directory
+
+   - name: Password file
+     shell: echo "{{postgr_user_pass.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-postgr
+
+   - name: Copy password file
+     fetch:
+        src: /root/Password-{{Ipaddress.stdout}}/{{item}}
+        dest: /root/
+        flat: yes
+     with_items:
+       - Password-{{Ipaddress.stdout}}-postgr
+         
+   - name: password
+     debug:
+        msg: POSTGRESSQL  Password is {{postgr_user_pass.stdout}}
+

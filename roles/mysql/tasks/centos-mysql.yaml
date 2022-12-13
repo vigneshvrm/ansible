@@ -1,0 +1,63 @@
+- name: Disable SELinux
+  selinux:
+    state: disabled
+  
+- name: Install wget
+  yum:
+    name: wget
+    state: present
+
+# - name: Updating the yum packages before installing
+#   shell: yum -y update    
+
+- name: Get  the  Rpm for MYSQL
+  command: "rpm -Uvh https://repo.mysql.com/mysql80-community-release-el7-3.noarch.rpm"
+  args:
+    warn: false
+
+
+- name: Enbale the Rpm
+  shell: "sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo"
+  ignore_errors: true
+  args:
+    warn: false
+
+- name: Add GPG key 
+  shell: ' rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022 '
+  args:
+    warn: false
+
+
+- name: Installing Mysql
+  shell: "yum --enablerepo=mysql80-community install mysql-community-server -y"
+  args:
+    warn: false
+
+- name: Start the service
+  shell: "{{item}}"
+  with_items:
+    - systemctl start mysqld
+    - systemctl enable mysqld.service
+
+- name: 'change password to native'
+  lineinfile:
+    path: /etc/my.cnf
+    insertafter: '^[mysqld]'
+    line: 'default-authentication-plugin=mysql_native_password'
+
+- name: restart mysql
+  service: name=mysqld state=restarted
+
+- name:  Install epel release 
+  shell: "yum install epel-release -y"
+
+- name: Install mysql in Centos
+  import_tasks: mysql_secure_installation.yaml   
+
+- name: Ensure phpMyAdmin is installed.
+  yum:
+    name: phpmyadmin
+    state: present
+
+- name: restart mysql
+  service: name=mysqld state=restarted

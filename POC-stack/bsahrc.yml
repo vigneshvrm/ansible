@@ -1,0 +1,121 @@
+- hosts: centos2
+  become: yes
+  become_user: root
+  vars_prompt:
+    - name: sqlservers
+      prompt: what is mysql Private ipaddress
+      private: no
+    - name: Domainname
+      prompt: what is Domian name
+      private: no   
+    # - name: ZABBIX_PVT_IP
+    #   prompt: what Zabbix Private Ip addresss
+    #   private: no   
+  tasks:
+
+   - name: Get the server IP address
+     command: curl http://checkip.amazonaws.com
+     register: pubipaddress   
+
+   - name: Get the server IP address
+     shell: hostname -I | awk '{print $1}'
+     register: Ipaddress   
+
+   - name: get the msql details
+     copy:
+       src: /root/{{item}}
+       dest: /tmp/
+     with_items:
+       - Password-{{sqlservers}}-zabbix
+       - Password-{{sqlservers}}-wolf
+       - Password-{{sqlservers}}-monogo
+      #  - Password-{{sqlservers}}-rabbitmq
+       - Password-{{sqlservers}}
+      #  - Password-{{Ipaddress.}}-pvtipZabbix
+      #  - Password-{{ZABBIX_PVT_IP}}-zabbixadmin
+      #  - Password-{{ZABBIX_PVT_IP}}-publicipZabbix
+
+      #  - bsahrc.txt
+
+   - name: get the bsahrc 
+     copy:
+       src: {{item}} 
+       dest: /tmp/
+     with_items:
+       - bsahrc.txt
+       - EncryptionUtil.class
+       - EncryptionUtil.java   
+
+   - name: get the java 
+     copy:
+        src: {{item}} 
+        dest: /root/
+     with_items:
+        - EncryptionUtil.class
+        - EncryptionUtil.java          
+
+   - name: Generate the Zabbix Admin password
+     shell: openssl rand -base64 16
+     register: zabbix_Admin_pass       
+
+   - name: Get the password monogo details
+     command: cat /tmp/Password-{{sqlservers}}-monogo
+     register: monogo
+
+   - name: Get the password zabbix details
+     command: cat /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-rabbitmq
+     register: rabbitpass
+
+   - name: Get the password zabbix details
+     command: cat /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbix_stackbill_pass
+     register: zabbix_stackbill_pass
+
+   - name: Get the password wolf details
+     command: cat /tmp/Password-{{sqlservers}}-wolf
+     register: wolf
+
+   - name: Get the password zabbix details
+     command: cat /tmp/Password-{{sqlservers}}-zabbix
+     register: zabbix
+
+   - name: Encrypted password
+     shell: java EncryptionUtil {{zabbix_stackbill_pass.stdout}}  bt/dLcRhhK/LYdTchNXxsQ==
+     register: Encrypted_stack_bill     
+
+  #  - name: Get the password zabbix details
+  #    command: cat /root/Password-{{ZABBIX_PVT_IP.stdout}}-pvtipZabbix
+  #    register: pvtipZabbix
+
+  #  - name: Get the password zabbix details
+  #    command: cat /root/Password-{{ZABBIX_PVT_IP.stdout}}-publicipZabbix
+  #    register: zabbixadmin     
+
+  #  - name: Get the password zabbix details
+  #    command: cat /root/Password-{{ZABBIX_PVT_IP.stdout}}-zabbixadmin
+  #    register: publicipZabbix        
+
+   - name: Get the Ip address
+     command: cat /tmp/Password-{{sqlservers}}
+     register: ip
+
+   - name: Replace the credentails
+     replace:
+       path: /tmp/bsahrc.txt
+       regexp: "{{item.find}}"
+       replace: "{{item.replace}}"
+     with_items:       
+       - {find: 'wolfpass', replace: '{{wolf.stdout}}' }
+       - {find: 'wolfmonpass', replace: '{{monogo.stdout}}' }
+       - {find: 'rabbitpass', replace: '{{rabbitpass.stdout}}' }
+       - {find: '10.61.61.250', replace: '{{ip.stdout}}' }
+       - {find: '10.61.61.2', replace: '{{Ipaddress.stdout}}' }
+       - {find: 'control.zehost.live', replace: '{{Domainname}}' }  
+       - {find: '185.95.215.18', replace: '{{pubipaddress.stdout}}' }     
+       - {find: '10.61.61.250', replace: '{{sqlservers}}' }
+       - {find: 'WOLF_MONGO_HOST=localhost', replace: 'WOLF_MONGO_HOST={{sqlservers}}' }
+       - {find: 'WOLF_DB_HOST=localhost', replace: 'WOLF_DB_HOST={{sqlservers}}' }
+       - {find: 'ab22996b80e4fb373de9ec995ac5f3ed', replace: '{{Encrypted_stack_bill.stdout}}' }
+
+
+   - name: copy the content to bashrc    
+     shell: cat /tmp/bsahrc.txt >> /root/.bashrc

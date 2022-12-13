@@ -1,0 +1,20 @@
+- hosts: centos
+  become: yes
+  become_user: root
+  vars_files:
+    - var.yaml
+  tasks:
+    # - name: Check if the log file exists
+    #   stat:
+    #     path: '{{item}}'
+    #   with_items:
+    #      '{{del_files}}'
+    #   register: files
+
+    - name:  delete log files
+      file:
+        path: '{{item}}'
+        state: absent
+      with_items:
+         '{{del_files}}'
+

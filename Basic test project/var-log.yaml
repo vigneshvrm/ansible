@@ -1,0 +1,37 @@
+- hosts: centos
+  become: yes
+  become_user: root
+  tasks:
+
+    - name: find  top 10 Disk usage  
+      shell: nice -0 find /var/log/ -type f -exec du -Sh {} + | sort -rh | head -n 10 > /root/log_file
+      register: top_10_files
+
+    - name: View the top 10 Disk usage  
+      command: cat /root/log_file 
+      register: log_file
+    
+    - debug:
+        msg: '{{log_file.stdout_lines}}'
+
+    - name: Filter only the log rotate files 
+      shell: cat /root/log_file |awk '{print $2}'| grep -E '*-[0-9]' > /root/high_file
+      register: rotated_log
+
+    - name: View the rotated  Disk usage  
+      command: cat /root/high_file 
+      register: high_file
+    
+    - debug:
+        msg: '{{high_file.stdout_lines}}'
+    
+    - name: find all log rotate files 
+      shell:  nice -0 find /var/log/ -type f -name '*-[0-9]*' > /root/all_rotated_logs
+      register: all_rotated_log
+
+    - name: View the all rotated files 
+      command: cat /root/all_rotated_logs 
+      register: all_rotated_logs
+    
+    - debug:
+        msg: '{{all_rotated_logs.stdout_lines}}'

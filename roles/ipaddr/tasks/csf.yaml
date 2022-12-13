@@ -1,0 +1,17 @@
+- name: Check if IP adddressis blocked in csf
+  shell: less "{{csf_deny}}" | grep {{IPaddress}}
+  register: lfd
+  failed_when: lfd  == 0
+
+- name: lfd-output
+  debug:
+    var: lfd.stdout_lines
+
+- name: Allow Ip adddress in csf
+  shell: csf -dr {{IPaddress}}
+  register: Allow
+  when: lfd.stdout.find(IPaddress) == 0
+
+- name: allow-output
+  debug:
+    var: Allow.stdout_lines

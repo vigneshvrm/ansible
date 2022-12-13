@@ -1,0 +1,90 @@
+# tasks file for mongodb
+
+- name: Get the server IP address
+  shell: hostname -I | awk '{print $1}'
+  register: hostname
+
+- name: Install openssl for Password
+  apt:
+    name: openssl
+    state: present
+
+- name: Generate the Mysql user password
+  shell: openssl rand -base64 16
+  register: mysql_user_pass
+
+- name: Adding Key for MongoDB
+  shell: 'curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -'
+
+- name: Adding  MongoDB's APT repository
+  shell: 'echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list'
+
+- name: Updating the apt packages before installing
+  shell: apt -y update
+  args:
+    warn: false # set warn=false to prevent warning
+
+- name: Installing the pymongo
+  shell: apt install python-pip  -y && python -m pip install pymongo
+  args:
+    warn: false 
+
+- name: Installing MongoDB
+  shell: apt install mongodb-org -y
+  args:
+    warn: false
+
+- name: Taking backup of the Mongo Configuration files
+  copy:
+    src: /etc/mongod.conf
+    dest: /etc/mongod.conf-{{ansible_date_time.iso8601}}
+    remote_src: yes
+
+- name: Replacing
+  replace:
+    path: /etc/mongod.conf
+    regexp: '#security:'
+    replace: 'security:'
+
+- name: Replacing
+  replace:
+    path: /etc/mongod.conf
+    regexp: 'bindIp: 127.0.0.1'
+    replace: 'bindIp: 0.0.0.0'
+
+- name: Security Tweaking
+  lineinfile:
+    path: /etc/mongod.conf
+    insertafter: "security:"
+    line: '  authorization: enabled'
+
+- name: Reload daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Start the service
+  shell: "{{item}}"
+  with_items:
+    - systemctl start mongod
+    - systemctl enable mongod
+
+- name: Displays connects to the database and displays the current version of MongoDB, server URL, and port it is listening on.
+  shell: "systemctl status mongod | grep -i since"
+  register: output
+
+- name: Add user
+  shell:  >-
+     mongo admin  --eval "db.getSiblingDB('admin').createUser({user: 'stackbill', pwd: '{{mysql_user_pass.stdout}}', roles: ['root']})"
+
+
+- debug:
+    msg: Mongo User password is "{{mysql_user_pass.stdout}}"
+
+- name: Password file
+  shell: echo Mongo User password is "{{mysql_user_pass.stdout}}" >> /root/{{hostname.stdout}}
+
+- name: Copy password file
+  fetch:
+    src: /root/{{hostname.stdout}}
+    dest: /root/
+    flat: yes

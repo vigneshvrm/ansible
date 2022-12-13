@@ -1,0 +1,117 @@
+- name: Get the server IP address
+  shell: hostname -I | awk '{print $1}'
+  register: hostname
+
+- name: Install wget
+  yum:
+    name: wget
+    state: present
+
+- name: Install bzip2
+  yum:
+    name: bzip2
+    state: present
+
+- name: Install openssl for Password
+  yum:
+    name: openssl
+    state: present
+
+- name: Updating the yum packages before installing
+  shell: yum -y update    
+  args:
+    warn: false
+
+- name: Generate the Mysql user password
+  shell: openssl rand -base64 16
+  register: mysql_user_pass
+
+# - name: Install MySQL 5.7 repo
+#   shell: yum install http://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm -y
+#   args:
+#     warn: false
+
+- name: Install MySQL 5.7 repo
+  yum:
+   name: http://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm 
+   state: present
+
+
+- name: Add GPG key 
+  shell: 'rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022'
+  args:
+    warn: false
+
+- name: Install MySQL 5.7
+  yum: 
+    name: ['mysql-community-server', 'mysql-community-client', 'MySQL-python']
+    state: present
+  # with_items:
+  #   - mysql-community-server
+  #   - mysql-community-client
+  #   - MySQL-python
+  
+- name: Start the service
+  shell: "{{item}}"
+  with_items:
+    - systemctl start mysqld
+    - systemctl enable mysqld.service
+
+- name:  Install epel release 
+  shell: "yum install epel-release -y"
+
+
+- name: Install mysql in Centos
+  import_tasks: mysql_secure_installation.yaml   
+
+- name: 'Add sql_modein my.cnf'
+  lineinfile:
+    path: /etc/my.cnf
+    insertafter: '^[mysqld]'
+    line: 'sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES'
+
+- name: 'Add bind my.cnf'
+  lineinfile:
+    path: /etc/my.cnf
+    insertafter: '^[mysqld]'
+    line: 'bind-address= 0.0.0.0'
+
+- name: restart mysql
+  service: name=mysqld state=restarted
+
+- name: 'Add Mysql user'  
+  mysql_user:
+    name: stackbill
+    password: '{{mysql_user_pass.stdout}}'
+    priv: '*.*:ALL'
+    state: present
+
+- name: Create new databases
+  mysql_db:
+    name:
+      - acqio        
+      - mobbex           
+      - wolf
+    state: present
+
+- name: Copy database dump file
+  copy:
+    src: migration.sql.bz2
+    dest: /tmp
+
+- name: Restore mysql Table
+  mysql_db:
+    name: wolf
+    state: import
+    target: /tmp/migration.sql.bz2
+
+
+- name: Password file
+  shell: echo Mysql User password is "{{mysql_user_pass.stdout}}" >> /root/{{hostname.stdout}}
+
+- name: Copy password file
+  fetch:
+    src: /root/{{hostname.stdout}}
+    dest: /root/
+    flat: yes
+  

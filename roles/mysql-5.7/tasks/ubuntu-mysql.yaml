@@ -1,0 +1,88 @@
+
+- name: Get the server IP address
+  shell: hostname -I | awk '{print $1}'
+  register: hostname
+
+- name: Update the Ubuntu packages
+  command: apt update
+
+- name: Install openssl for Password
+  apt:
+    name: openssl
+    state: present
+
+- name: Generate the Mysql user password
+  shell: openssl rand -base64 16
+  register: mysql_user_pass
+
+- name: Upgrade the Ubuntu packages
+  command: apt upgrade  -y
+
+- name: Install MySQL-python packages
+  shell: apt install python-pip -y && pip install -U pip && apt install python-dev libmysqlclient-dev -y && pip install MySQL-python
+
+- name: Install Mysql server
+  command: apt install mysql-server -y
+
+- name: 'Add sql_modein my.cnf'
+  lineinfile:
+    path: /etc/my.cnf
+    insertafter: '^[mysqld]'
+    line: 'sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES'
+
+- name: 'Add bind my.cnf'
+  lineinfile:
+    path: /etc/my.cnf
+    insertafter: '^[mysqld]'
+    line: 'bind-address= 0.0.0.0'
+
+- name: restart mysql
+  service: name=mysql state=restarted
+
+- name: Reload privilege tables
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES';
+  changed_when: False
+
+- name: Add Mysql user
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - CREATE USER 'stackbill'@'%' IDENTIFIED BY '{{mysql_user_pass.stdout}}';
+  changed_when: False
+
+- name: Create new databases
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - CREATE DATABASE acqio; CREATE DATABASE mobbex; CREATE DATABASE wolf;
+  changed_when: False
+
+- name: Providing privileges 
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - GRANT ALL PRIVILEGES ON *.* TO 'stackbill'@'%';
+  changed_when: False
+
+- name: Copy database dump file
+  copy:
+    src: migration.sql.bz2
+    dest: /tmp
+
+- name: Restore mysql Table
+  mysql_db:
+    name: wolf
+    state: import
+    target: /tmp/migration.sql.bz2
+
+- name: Install mysql in Centos
+  import_tasks: mysql_secure_installation.yaml  
+
+- name: Password file
+  shell: echo Mysql User password is "{{mysql_user_pass.stdout}}" >> /root/{{hostname.stdout}}
+
+- name: Copy password file
+  fetch:
+    src: /root/{{hostname.stdout}}
+    dest: /root/
+    flat: yes
+  

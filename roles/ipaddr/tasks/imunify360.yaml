@@ -1,0 +1,20 @@
+- name: 'Check if IP adddress is blocked in imunify'
+  shell: 'ipset list | grep {{IPaddress}}'
+  register: imunify
+  failed_when: lfd == 0
+
+- name: imunify-output:q!
+
+  debug:
+  var: imunify.stdout_lines
+
+- name: 'Allow IP adddress in imunify'
+  shell: 'imunify360-agent blacklist ip delete {{IPaddress}} && imunify360-agent whitelist ip add {{IPaddress}}'
+  register: imunify-allow
+  when: imunify.stdout.find(IPaddress) == 0
+
+- name: imunify-allow-output
+  debug:
+  var: imunify-allow.stdout.lines
+
+

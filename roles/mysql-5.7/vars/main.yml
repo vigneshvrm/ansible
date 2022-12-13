@@ -1,0 +1,8 @@
+---
+# vars file for mysql-5.7
+
+# mysql_root_password: Yln^S2X3WoC67&W0
+
+# mysql_user_pass: unudT*6u1p75Vmiz
+
+mysql_default_pass: rootpw

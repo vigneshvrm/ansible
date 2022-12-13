@@ -1,0 +1,24 @@
+- name: Update the Ubuntu packages
+  command: apt update
+
+- name: Upgrade the Ubuntu packages
+  command: apt upgrade  -y
+
+- name: Install Mysql server
+  command: apt install mysql-server -y
+
+- name: Install mysql in Centos
+  import_tasks: mysql_secure_installation.yaml   
+
+
+- name: Ensure apache is installed.
+  apt:
+     name: apache2 
+     update_cache: yes 
+     state: present
+
+- name: Ensure phpMyAdmin is installed.
+  apt:
+    name: phpmyadmin
+    state: present
+

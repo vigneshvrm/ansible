@@ -1,0 +1,119 @@
+# tasks file for mongodb
+
+- name: Get the server IP address
+  shell: hostname -I | awk '{print $1}'
+  register: hostname
+
+- name: Install openssl for Password
+  yum:
+    name: openssl
+    state: present
+
+- name: Generate the Mysql user password
+  shell: openssl rand -base64 16
+  register: mysql_user_pass
+
+
+- name: Adding MongoDB repo
+  file:
+    path: /etc/yum.repos.d/mongodb.repo
+    state: touch
+
+- name: Adding repo lines
+  blockinfile:
+    path: /etc/yum.repos.d/mongodb.repo
+    block: |
+      [mongodb-org-4.4]
+      name=MongoDB Repository
+      baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/4.4/x86_64/
+      gpgcheck=1
+      enabled=1
+      gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
+      
+
+- name: Updating the yum packages before installing
+  shell: yum clean all && yum makecache && yum -y update
+  args:
+    warn: false # set warn=false to prevent warning
+
+- name: Installing the pymongo
+  shell: yum -y install epel-release && yum -y install python-pymongo
+  args:
+    warn: false 
+
+- name: Installing MongoDB
+  shell: yum -y install mongodb-org
+  args:
+    warn: false
+
+- name: Configuring MongoDB
+  file:
+    path: /etc/security/limits.d/99-mongodb-nproc.conf
+    state: touch
+
+- name: Adding repo lines
+  blockinfile:
+    path: /etc/security/limits.d/99-mongodb-nproc.conf
+    block: |
+      - f (file size): unlimited
+      - t (cpu time): unlimited
+      - v (virtual memory): unlimited [1]
+      - l (locked-in-memory size): unlimited
+      - n (open files): 64000
+      - m (memory size): unlimited [1] [2]
+      - u (processes/threads): 64000
+
+- name: Taking backup of the Mongo Configuration files
+  copy:
+    src: /etc/mongod.conf
+    dest: /etc/mongod.conf-{{ansible_date_time.iso8601}}
+    remote_src: yes
+
+- name: Replacing
+  replace:
+    path: /etc/mongod.conf
+    regexp: '#security:'
+    replace: 'security:'
+
+- name: Replacing
+  replace:
+    path: /etc/mongod.conf
+    regexp: 'bindIp: 127.0.0.1'
+    replace: 'bindIp: 0.0.0.0'
+
+- name: Security Tweaking
+  lineinfile:
+    path: /etc/mongod.conf
+    insertafter: "security:"
+    line: '  authorization: enabled'
+
+- name: Reload daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Start the service
+  shell: "{{item}}"
+  with_items:
+    - systemctl start mongod
+    - systemctl enable mongod
+
+- name: Displays connects to the database and displays the current version of MongoDB, server URL, and port it is listening on.
+  shell: "systemctl status mongod | grep -i since"
+  register: output
+
+- name: Add user
+  shell:  >-
+     mongo admin  --eval "db.getSiblingDB('admin').createUser({user: 'stackbill', pwd: '{{mysql_user_pass.stdout}}', roles: ['root']})"
+
+
+- debug:
+    msg: Mongo User password is "{{mysql_user_pass.stdout}}"
+
+- name: Password file
+  shell: echo Mongo User password is "{{mysql_user_pass.stdout}}" >> /root/{{hostname.stdout}}
+
+- name: Copy password file
+  fetch:
+    src: /root/{{hostname.stdout}}
+    dest: /root/
+    flat: yes

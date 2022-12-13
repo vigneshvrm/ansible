@@ -1,0 +1,12 @@
+---
+# tasks file for partition_root_lvm
+
+- name: Check if the os is Debian
+  import_tasks: part_ubuntu_lvm.yaml
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Check if the os is Redhat
+  import_tasks: part_centos_lvm.yaml
+  when: ansible_facts['os_family'] == "RedHat"
+
+

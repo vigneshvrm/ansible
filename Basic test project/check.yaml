@@ -1,0 +1,23 @@
+- hosts: centos
+  become: yes
+  become_user: root
+  tasks:
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+
+   - name: Replace the mongo details
+     lineinfile:
+       path: /etc/yum.repos.d/CentOS-Base.repo
+       insertafter: '[base]'
+       line: exclude=postgresql*
+
+   - name: Replace the mongo details
+     lineinfile:
+       path: /etc/yum.repos.d/CentOS-Base.repo
+       insertafter: '[updates]'
+       line: exclude=postgresql*
+
+  #  - shell: yum install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm -y
+
+   - shell: yum -y install postgresql11-server -y

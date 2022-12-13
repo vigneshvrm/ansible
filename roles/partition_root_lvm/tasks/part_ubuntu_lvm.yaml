@@ -1,0 +1,47 @@
+- name: Check The partition Disk avaliable on the server
+  shell:  "lsblk | grep disk | awk '{print $1}' | head -n 1"
+  register: disk
+
+- name: Fix Partition
+  expect:
+    command:  parted /dev/xvda print free
+    responses:
+      'Fix/Ignore?' : 'Fix'
+
+- name: find the Free space avaliable 
+  shell: parted /dev/{{disk.stdout}} print free | grep Free | tail -1 | awk '{print $2}'
+  register: end_no
+
+- name: find the Lvm disk 
+  shell:  fdisk -l | grep  "LVM"  | awk '{print $1}'
+  register: lvm
+
+- name: find the vg
+  shell:  vgdisplay  | grep "VG Name" | awk '{print $3}'
+  register: vg_name
+
+- name: find the lv
+  shell:  lvdisplay  | grep "LV Name" | awk '{print $3}'
+  register: lv_name
+
+- name: find the pv
+  shell: pvdisplay  | grep "PV Name" |awk '{print $3}'
+  register: pv_name
+
+- name: Extend an existing partition to fill all available space
+  shell: parted -s -a opt /dev/{{disk.stdout}} "resizepart 3 100%"
+  when: '"1049kB" not in end_no.stdout'
+  register: resize
+
+- name: Resize a Physical volume
+  command: pvresize {{pv_name.stdout}}
+  when: '"1049kB" not in end_no.stdout'
+  register: pvresize
+
+- name: Extend the logical volume to consume all remaining space in the volume group
+  lvol:
+    vg: "{{vg_name.stdout}}"
+    lv: "{{lv_name.stdout}}"
+    size: +100%FREE
+    resizefs: true
+  when: '"1049kB" not in end_no.stdout'

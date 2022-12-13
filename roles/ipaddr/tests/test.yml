@@ -1,0 +1,10 @@
+---
+- hosts: centos
+  become: yes
+  become_user: root
+  vars_prompt:
+    - name: IPaddress
+      prompt: what is ipaddress
+      private: no
+  roles:
+    - ipaddr

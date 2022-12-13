@@ -1,0 +1,4 @@
+---
+# defaults file for ipaddr
+csf_deny: /etc/csf/csf.deny
+hosts_allow: /etc/hosts.allow

@@ -1,0 +1,17 @@
+---
+
+- name: find the total disk usage
+  shell: df -h | awk '{print $5}'| grep "9[4-9][0-9]*" |  cut -d '%' -f1
+  register: percentage
+
+- name: find the partition
+  shell: df -h | grep {{percentage.stdout}} | awk '{print $6}'
+  register: partition
+
+- name: find the high disk usage
+  shell: nice -0 du -h  {{partition.stdout}}* |sort -h | tail -n 20
+  register: highdisk
+
+- copy:
+   content: "{{ highdisk.stdout }}"
+   dest: /root/diskusage

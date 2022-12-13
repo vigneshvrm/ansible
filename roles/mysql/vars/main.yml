@@ -1,0 +1,6 @@
+---
+# vars file for mysql
+
+mysql_root_password: Yln^S2X3WoC67&W0
+
+msi_mysql_root_pass: ''

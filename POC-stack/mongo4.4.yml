@@ -1,0 +1,83 @@
+- hosts: centos
+  become: yes
+  become_user: root
+  tasks:
+   - name: Generate the Mysql user password
+     shell: openssl rand -base64 16
+     register: monogo_user_pass
+
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+
+   - name: Get the server IP address
+     shell: hostname -I | awk '{print $1}'
+     register: Ipaddress  
+
+   - name: Disable and Stop Firewall
+     service:
+       name: firewalld
+       state: stopped
+       enabled: False
+
+   - name: Download Mongo repo
+     get_url:
+       url: https://sp-poc.s3.amazonaws.com/MongoDB/mongodb-org-4.4.repo
+       dest: /etc/yum.repos.d/
+
+   - name: Install mongodb Packages
+     yum:
+       name: mongodb-org
+       state: present 
+
+   - name: Start and enable  mongodb
+     service:
+       name: mongod
+       state: started
+       enabled: Yes
+
+   - name: Add user
+     shell:  >-
+         mongo admin  --eval "db.getSiblingDB('admin').createUser({ user: 'stackbill' , pwd: '{{monogo_user_pass.stdout}}', roles: ['root']})"
+
+   - name: Replacing
+     replace:
+       path: /etc/mongod.conf
+       regexp: '#security:'
+       replace: 'security:'       
+
+   - name: Security Tweaking
+     lineinfile:
+        path: /etc/mongod.conf
+        insertafter: "security:"
+        line: ' authorization: enabled'
+
+   - name: Start and enable  mongodb
+     service:
+       name: mongod
+       state: restarted
+
+   - name: Create a directory
+     file:
+       path: /root/Password-{{Ipaddress.stdout}}
+       state: directory
+
+   - name: Password file
+     shell: echo "{{monogo_user_pass.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-monogo
+
+   - name: Password file
+     shell: echo "{{Ipaddress.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-mongoIP
+
+   - name: Copy password file
+     fetch:
+        src: /root/Password-{{Ipaddress.stdout}}/{{item}}
+        dest: /root/
+        flat: yes
+     with_items:
+       - Password-{{Ipaddress.stdout}}-monogo
+       - Password-{{Ipaddress.stdout}}-mongoIP
+
+
+   - name: password
+     debug:
+        msg: monogo  Password is {{monogo_user_pass.stdout}}       

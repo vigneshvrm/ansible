@@ -1,0 +1,116 @@
+---
+# tasks file for loadwatch-cpanel
+
+
+- name: Get server Uname 
+  shell: UNAME_A=$(uname -a)
+  register: UNAME_A
+
+- name: server uptime 
+  shell: echo -e " Uptime:- \n" >> logwatch && uptime >> logwatch && echo -e "\n" >> logwatch
+
+- name: server Disk Usage 
+  shell: echo -e " Current Disk Usage (df -h):- \n" >> logwatch && df -h >> logwatch && echo -e "\n" >> logwatch
+
+- name: Free Memory (Mb)
+  shell: 'echo -e " Free Memory (Mb):-  \n" >> logwatch && free -k >> logwatch && echo -e "\n" >> logwatch'
+
+- name: Server uname
+  shell: 'echo -e " Server Info:-  \n" >> logwatch && echo -e "$UNAME_A \n" >> logwatch && echo -e "\n" >> logwatch'
+
+- name: HTTPD Processes
+  shell: 'NUMHTTPD=$(ps aux|grep httpd|wc -l) && echo "Number of HTTPD Processes:- $NUMHTTPD" >> logwatch && echo -e "\n" >> logwatch'
+
+- name: HTTPD CPU consumption
+  shell: HTTPDCPU=$(ps aux|grep httpd|awk '{sum+=$3} END {print sum}') && echo "HTTPD CPU consumption:- $HTTPDCPU" >> logwatch && echo -e "\n" >> logwatch
+
+- name: Memory Consumption
+  shell: HTTPDMEM=$(ps aux|grep httpd|awk '{sum+=$6} END {print sum}') && HTTPDMEMMEG=$((HTTPDMEM/1024)) && echo "HTTPD memory consumption:- $HTTPDMEM Kilobytes ($HTTPDMEMMEG Megabytes)" >> logwatch && echo -e "\n" >> logwatch
+
+- name: CPU Cores
+  shell: NUMPROCS=$(grep -c processor /proc/cpuinfo) && echo "Number of CPU Cores:- $NUMPROCS" >> logwatch && echo -e "\n" >> logwatch
+
+- name: PHP Processes
+  shell: NUMPHP=$(ps aux|grep php|wc -l) &&  echo "Number of PHP Processes:- $NUMPHP" >> logwatch && echo -e "\n" >> logwatch
+
+- name: PHP CPU Consumption
+  shell: PHPCPU=$(ps aux|grep php|awk '{sum+=$3} END {print sum}') && echo "PHP CPU consumption:- $PHPCPU" >> logwatch && echo -e "\n" >> logwatch
+
+- name: PHP Memory Consumption
+  shell: PHPMEM=$(ps aux|grep php|awk '{sum+=$6} END {print sum}') && PHPMEMMEG=$((PHPMEM/1024)) && echo "PHP memory consumption:- $PHPMEM Kilobytes ($PHPMEMMEG Megabytes)" >> logwatch && echo -e "\n" >> logwatch
+
+- name: Mysql Consumption
+  shell: MYSQLCPU=$(top -n 1 -S -b -U mysql|tail -n 2 | tail -n 1 | awk {'print $9'}) && echo "MYSQL CPU consumption:- $MYSQLCPU %" >> logwatch && echo -e "\n" >> logwatch
+
+- name: Mysql Memory Consumption
+  shell: MYSQLMEM=$(top -n 1 -S -b -U mysql|tail -n 2|tail -n 1|awk {'print $6'}) && 	echo "MYSQL RAM consumption:- $MYSQLMEM" >> logwatch && 	echo -e "\n" >> logwatch
+
+- name: Network
+  shell: echo -e " HTTP connections by ip address  \n" >> logwatch &&	netstat -tn 2>/dev/null | grep ":80" | awk '{print $5}' | cut -d ':' -f1 | sort | uniq -c | sort -nr | head >> logwatch &&	echo -e "\n\n" >> logwatch
+
+- name: Total num HTTP connections
+  shell: 	echo -e " Total num HTTP connections \n" >> logwatch && 	netstat -an | grep :80 | wc -l >> logwatch &&	echo -e "\n" >> logwatch
+
+- name: CPU top 20 
+  shell: echo -e  "CPU top 20  \n" >> logwatch && top -bcn1 | head -n 26 >> logwatch && echo -e "\n" >> logwatch
+
+- name: Memory top 20
+  shell: echo -e  "Mem top 20 \n" >> logwatch && top -o %MEM | head -n 26 >> logwatch && echo -e "\n" >> logwatch
+
+- name: Historical CPU Usage
+  shell: 	echo -e  "Historical CPU Usage (sar -p):-  \n" >> logwatch && 	sar -p >> logwatch && echo -e "\n" >> logwatch
+
+- name: Historical Memory Usage
+  shell: 	echo -e " Historical Memory Usage (sar -r \n" >> logwatch && sar -S >> logwatch && echo -e "\n" >> logwatch
+
+- name: Historical Disk IO
+  shell: 	echo -e "Historical Disk I/O Usage (sar -d):-  \n" >> logwatch && sar -d >> logwatch &&	echo -e "\n" >> logwatch
+
+- name: Input/Output Statistics
+  shell: 	echo -e "Iostat -- Input/Output Statistics (iostat):- \n" >> logwatch && iostat >> logwatch && echo -e "\n" >> logwatch 
+
+- name: Real time Disk I/O and processes
+  shell: 	echo -e " Real time Disk I/O and processes (iotop -n 1 -b):-  \n" >> logwatch && iotop -n 1 -b >> logwatch && echo -e "\n" >> logwatch
+
+- name: Sites with traffic in the last 60 seconds
+  shell: 	echo -e " Sites with traffic in the last 60 seconds:-  \n" >> logwatch && 	find /usr/local/apache/domlogs/ -maxdepth 1 -type f -mmin -1 | egrep -v 'offset|_log$' >> logwatch && echo -e "\n\n" >> logwatch
+
+- name: MySQL
+  shell: echo -e "MySQL ------------------------------------------------------------ \n\n" >> logwatch && mysqladmin stat >> logwatch && mysqladmin proc >> logwatch &&	echo -e "\n\n" >> logwatch
+
+- name: Apache
+  shell: echo -e "Apache Full Status------------------------------------------------ \n\n" >> logwatch && 	/sbin/service httpd status >> logwatch &&	echo -e "\n\n" >> logwatch
+
+- name: Network
+  shell: echo -e "Number of HTTP connections by connecting ip address ----- \n\n" >> logwatch && netstat -tn 2>/dev/null | grep ":80" | awk '{print $5}' | cut -d ':' -f1 | sort | uniq -c | sort -nr | head >> logwatch && echo -e "\n\n" >> logwatch
+
+- name: Total number of HTTP connections
+  shell: 	echo -e "Total number of HTTP connections ---------------------- \n\n" >> logwatch && netstat -an | grep :80 | wc -l >> logwatch &&	echo -e "\n\n" >> logwatch
+
+- name: Network Connection States
+  shell: 	echo -e "Network Connection States ---------------------- \n\n" >> logwatch && 	netstat -ant | awk '{print $6}' | sort | uniq -c | sort -n >> logwatch &&	echo -e "\n\n" >> logwatch
+
+- name: Statistics for All Ports
+  shell: 	echo -e "Statistics for All Ports ---------------------- \n\n" >> logwatch && netstat -s >> logwatch &&	echo -e "\n\n" >> logwatch
+
+- name: ifconfig 
+  shell: echo -e "ifconfig (ethernet setup) ----- \n\n" >> logwatch && ifconfig >> logwatch && echo -e "\n\n" >> logwatch
+
+- name: Socket Information
+  shell: 	echo -e "Socket Information ----- \n\n" >> logwatch && ss -s >> logwatch &&	echo -e "\n\n" >> logwatch
+
+- name: Network Interface Statistics
+  shell: 	echo -e "Network Interface Statistics ----- \n\n" >> logwatch && 	ip -s link >> logwatch &&	echo -e "\n\n" >> logwatch
+
+- name: Email
+  shell: echo -e "Email--------------------------------------------------------------- \n\n" >> logwatch && /usr/sbin/exiwhat >> logwatch && echo -e "\n\n" >> logwatch
+
+- name: Email in the queue
+  shell: echo -e "Email in the queue ----- \n\n" >> logwatch && exim -bpc >> logwatch &&	echo -e "\n\n" >> logwatch
+
+- name: Summary of messages in the queue
+  shell: 		echo -e "Summary of messages in the queue ----- \n\n" >> logwatch && exim -bp | exiqsumm >> logwatch && echo -e "\n\n" >> logwatch
+  
+- name: Process List
+  shell: echo -e "Processes------------------------------------------------------------ \n\n" >> logwatch && ps auxf >> logwatch
+  

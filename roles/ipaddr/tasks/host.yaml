@@ -1,0 +1,15 @@
+- name: 'Check if IP adddress is in Host access '
+  shell: less "{{hosts_allow}}" |grep "deny all"
+  register: hosts
+
+- name: 'Check if the IP address already exist'
+  shell: less "{{hosts_allow}}" |grep "{{IPaddress}}"
+  register: present
+  failed_when: present == 0
+
+- name: 'Add IP adddress in Host access '
+  lineinfile:
+  path: "{{hosts_allow}}"
+  insertbefore: BOF
+  line: 'All {{IPaddress}}: allow'
+  when: hosts.stdout.find('deny') == 0

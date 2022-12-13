@@ -1,0 +1,14 @@
+---
+# tasks file for loadwatch-cpanel
+
+- name: Calculate server Threshold 
+  shell: Threshold="$(free | awk 'FNR == 3 {print $4/($3+$4)*100-100}'| sed 's/-//g')"
+  register: Threshold
+
+- name: Calculate Server Load
+  shell: LOAD="$[100-$(vmstat 1 2|tail -1|awk '{print $15}')]" 
+  register: LOAD
+
+- name: Check if  Load and Threshold
+  import_tasks: server-details.yml
+  # when:  Threshold.stdout > "0" or LOAD.stdout > "0"

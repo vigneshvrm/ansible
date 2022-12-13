@@ -1,0 +1,65 @@
+---
+- hosts: centos
+  become: yes
+  become_user: root
+  tasks:
+
+   - name: Get the server IP address
+     shell: hostname -I | awk '{print $1}'
+     register: Ipaddress   
+
+   - name: get the post user details
+     copy:
+       src: /root/{{item}}
+       dest: /tmp/
+     with_items:
+       - Password-{{Ipaddress.stdout}}-postgr  
+
+   - name: get the msql details
+     command: cat /tmp/Password-{{Ipaddress.stdout}}-postgr  
+     register: passpostgr
+
+   - name: KONG Installation
+     package:
+       name: https://sp-poc.s3.amazonaws.com/Kong/kong-community-edition-0.13.1.el7.noarch.rpm
+       state: present 
+
+   - name: copy the KONG conf file
+     copy:
+       src: /etc/kong/kong.conf.default
+       dest: /etc/kong/kong.conf
+       remote_src: yes
+
+   - name: Replace the mongo details
+     lineinfile:
+       path: /etc/kong/kong.conf
+       regexp: "{{item.find}}"
+       line: "{{item.replace}}"
+     with_items:
+       - {find: '#proxy_listen', replace: 'proxy_listen = 0.0.0.0:8000, 0.0.0.0:8443 ssl' }
+       - {find: '#admin_listen', replace: 'admin_listen = 127.0.0.1:8001, 127.0.0.1:8444 ssl' }
+       - {find: '#database', replace: 'database = postgres' }
+       - {find: '#pg_host', replace: 'pg_host = 127.0.0.1' }
+       - {find: '#pg_user', replace: 'pg_user = kong ' }
+       - {find: '#pg_password = ', replace: 'pg_password = {{passpostgr.stdout}}' }
+       - {find: '#pg_database', replace: 'pg_database = kong' }
+       - {find: '127.0.0.1', replace: '0.0.0.0' }       
+
+   - name: kong migrations
+     command: kong migrations up                                                     
+
+   - name: Set ulimit
+     shell: ulimit -n 4096
+
+   - name: start  Kong
+     command: kong start
+
+   - name: KONG Installation dashboard
+     package:
+       name: 
+         - epel-release
+         - npm
+       state: present 
+
+   - name: install KONG dashboard
+     shell: npm install -g kong-dashboard

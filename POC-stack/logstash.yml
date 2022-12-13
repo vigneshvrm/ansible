@@ -1,0 +1,64 @@
+- hosts: centos
+  become: yes
+  become_user: root
+  # vars_prompt:
+  #   - name: Mongoserver
+  #     prompt: what is ipaddress
+  tasks:
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+
+   - name: Get the server IP address
+     shell: hostname -I | awk '{print $1}'
+     register: Ipaddress     
+
+   - name: get the msql details
+     copy:
+       src: /root/{{item}}
+       dest: /tmp/
+     with_items:
+       - Password-{{Ipaddress.stdout}}-monogo
+       - Password-{{Ipaddress.stdout}}-mongoIP
+
+
+  #  - name: get the msql details
+  #    command: cat /tmp/Password-{{Mysqlserver.stdout}}
+  #    register: ip
+     
+   - name: get the Mongo details
+     command: cat /tmp/Password-{{Ipaddress.stdout}}-mongoIP
+     register: mongodbIP    
+
+   - name: get the Mongo details
+     command: cat /tmp/Password-{{Ipaddress.stdout}}-monogo
+     register: mongodbpass   
+
+   - name: yum install logstash
+     yum: 
+      name: https://artifacts.elastic.co/downloads/logstash/logstash-6.4.2.rpm
+      state: present
+
+   - name: Restart logstash
+     service:
+       name: logstash
+       state: started
+       enabled: yes
+
+   - name: Install logstash mongo
+     command: /usr/share/logstash/bin/logstash-plugin install --version=3.1.5 logstash-output-mongodb
+   
+   - name: copy the Logstash conf file
+     copy:
+       src: logstash.conf
+       dest: /etc/logstash/conf.d/
+       
+
+   - name: Replace the mongo details
+     lineinfile:
+       path: /etc/logstash/conf.d/logstash.conf
+       regexp: "{{item.find}}"
+       line: "{{item.replace}}"
+     with_items:
+       - {find: '<mongodbpass>', replace: '{{mongodbpass.stdout}}' }
+       - {find: '<mongodbIP Password>', replace: '{{mongodbIP.stdout}}' }

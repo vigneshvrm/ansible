@@ -1,0 +1,65 @@
+# ansible-galaxy collection install community.rabbitmq
+
+- hosts: centos2
+  become: yes
+  become_user: root
+  tasks:
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+
+   - name: Get the server IP address
+     shell: hostname -I | awk '{print $1}'
+     register: Ipaddress        
+
+   - name: Generate the Mysql user password
+     shell: openssl rand -base64 20
+     register: rabbitmq
+
+   - name: Install Zabbix Packages
+     package:
+       name:
+         - https://packages.erlang-solutions.com/erlang/rpm/centos/7/x86_64/esl-erlang_24.0.2-1~centos~7_amd64.rpm
+         - https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.19/rabbitmq-server-3.8.19-1.el7.noarch.rpm
+       state: present
+
+   - name: Restart rabbitmq
+     service:
+       name: rabbitmq-server.service
+       state: started
+       enabled: yes
+
+   - name: enable rabbitmq-plugins
+     command: rabbitmq-plugins enable rabbitmq_management
+
+   - name: Add rabbitmq 
+     rabbitmq_user: 
+        user: mqadmin
+        password: "{{rabbitmq.stdout}}"
+        tags: administrator
+        permissions:
+          - vhost: /
+            configure_priv: .*
+            read_priv: .*
+            write_priv: .*
+        state: present
+
+   - name: Create a directory
+     file:
+       path: /root/Password-{{Ipaddress.stdout}}
+       state: directory
+
+   - name: Password file
+     shell: echo "{{rabbitmq.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-rabbitmq
+
+   - name: Copy password file
+     fetch:
+        src: /root/Password-{{Ipaddress.stdout}}/{{item}}
+        dest: /root/
+        flat: yes
+     with_items:
+       - Password-{{Ipaddress.stdout}}-rabbitmq
+
+   - name: password
+     debug:
+        msg: rabbitmq Password is {{rabbitmq.stdout}}        

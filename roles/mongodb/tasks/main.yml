@@ -1,0 +1,30 @@
+---
+# tasks file for mongodb
+
+
+- name:  Check if the os is Centos
+  import_tasks: centos.yaml
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Check if the os is Ubuntu
+  import_tasks: ubuntu18.yaml
+  when: ansible_facts['os_family'] == 'Debian' and  ansible_facts['distribution_major_version'] == "18"
+
+- name: Check if the os is Ubuntu
+  import_tasks: ubuntu20.yaml
+  when: ansible_facts['os_family'] == 'Debian' and  ansible_facts['distribution_major_version'] == "20"
+
+
+#Need to install mogodb comunity [community.mongodb]
+
+# - name: Add user
+#   mongodb_user:
+#     database: admin
+#     name: stackbill
+#     password: '{{mysql_user_pass.stdout}}'
+#     roles: readWrite,dbAdmin,userAdmin
+#     state: present
+#   when: ansible_facts['distribution_major_version'] == "18" 
+
+# - debug:
+#     msg: Mysql User password is '{{mysql_user_pass.stdout}}'

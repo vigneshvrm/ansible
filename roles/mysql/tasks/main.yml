@@ -1,0 +1,10 @@
+---
+# tasks file for mysql
+
+- name:  Check if the os is Centos
+  import_tasks: centos-mysql.yaml
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Check if the os is Ubuntu
+  import_tasks: ubuntu-mysql.yaml
+  when: ansible_facts['os_family'] == 'Debian'

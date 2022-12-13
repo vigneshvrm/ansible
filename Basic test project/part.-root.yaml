@@ -1,0 +1,47 @@
+- hosts: ubuntu
+  become: yes
+  become_user: root
+  tasks:
+
+    # - name: Check package
+    #   package_facts:
+    #     manager: auto
+
+    # - name: Requirements
+    #   debug:
+    #     msg: "Installing Pexpect to run secure tmp"
+
+    # - name: Check if Python2.7 is installed
+    #   ansible.builtin.unarchive:
+    #     src: https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
+    #     dest: /usr/local/src/
+    #   remote_src: yes
+    #   when: ("python2-rpm-macros" not in  ansible_facts.packages)
+
+    # - name: Installing Python2
+    #   shell: cd /usr/local/src/Python-2.7.18 && ./configure --enable-optimizations && make altinstall
+    #   when: ("python2-rpm-macros" not in  ansible_facts.packages)
+
+    # - name: Installing Dependencies
+    #   yum:
+    #     name: epel-release
+    #     state: present
+    #   when: ("python2-pip" not in  ansible_facts.packages)
+
+    # - name: Check PIP is installed
+    #   yum:
+    #     name: python-pip
+    #     state: present
+    #   when: ("python2-pip" not in  ansible_facts.packages)
+
+    # - name: check Pexpect is installed
+    #   pip:
+    #     name: pexpect==4
+    #   when: ("pexpect" not in ansible_facts.packages)
+    
+    - name: Secure tmp
+      expect:
+         command:  parted /dev/xvda print free
+         responses:
+            'Fix/Ignore?' : 'Fix'
+          

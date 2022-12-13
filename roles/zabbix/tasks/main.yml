@@ -1,0 +1,439 @@
+---
+# tasks file for zabbix
+
+# ansible-galaxy collection install ansible.posix
+# ansible-galaxy collection install community.zabbix
+
+- name: Get the server IP address
+  shell: hostname -I | awk '{print $1}'
+  register: hostname
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+  
+- name: Installing required packages 
+  yum:
+    name: [ wget, ed, iptables-services, epel-release, lsof, nc, telnet, vim, httpd, php, php-cli, php-common, php-devel, php-pear, php-gd, php-mbstring, php-mysql, php-xml, mariadb-server, openssl, gnutls-devel, zip, unzip]
+    state: present
+
+- name: Installing pip
+  shell:  yum install python-pip -y
+  args:
+    warn: false 
+
+- name: Installing Zabixx api
+  shell: pip install zabbix-api
+  args:
+    warn: false 
+
+
+- name: Start the apache and mariadb service
+  shell: "{{item}}"
+  with_items:
+    - systemctl start mariadb
+    - systemctl enable mariadb
+    - systemctl start httpd
+    - systemctl enable httpd
+
+- name: Add Mysql user
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - CREATE USER '{{zabbixuser}}'@'localhost' IDENTIFIED BY '{{zabbixpass}}';
+  changed_when: False
+
+- name: Create new databases
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - CREATE DATABASE zabbixdb; 
+  changed_when: False
+
+- name: Create new databases
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - GRANT ALL PRIVILEGES ON zabbixdb.* TO '{{zabbixuser}}'@'localhost';
+  changed_when: False
+
+
+- name: Mysql Root password 
+  shell: grep "A temporary password" /var/log/mysqld.log  |awk '{print $11}'
+  register:  password
+
+- name: Generate the Mysql Root password
+  shell: openssl rand -base64 16
+  register: mysql_root_pass
+
+- name: Debug root password
+  debug: 
+    var: mysql_root_pass
+
+- name: Generate the Zabbix Admin password
+  shell: openssl rand -base64 16
+  register: zabbix_Admin_pass
+
+- name: Check if root password is set
+  shell: mysqladmin -u root status
+        -p'{{mysql_root_pass.stdout}}'
+        -h localhost
+        -e "quit"
+  changed_when: false
+  failed_when: false
+  register: root_pwd_check
+
+- name: root | set root password
+  shell: >-
+      mysqladmin -u root
+      --password="{{password.stdout}}"
+      password "{{mysql_root_pass.stdout}}"
+  when: root_pwd_check.rc != 0
+  ignore_errors: yes
+
+- name: Add .my.cnf
+  template: src=my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode=0600
+
+- name: Import a Zabbix key from a url
+  rpm_key:
+    key: http://repo.zabbix.com/RPM-GPG-KEY-ZABBIX
+    state: present
+  
+- name: Download  Requried Rpms
+  shell: wget --no-check-certificate "{{item}}" -P /opt
+  ignore_errors: yes
+  with_items:
+    - https://repo.zabbix.com/zabbix/3.4/rhel/7/x86_64/zabbix-agent-3.4.15-1.el7.x86_64.rpm 
+    - https://repo.zabbix.com/zabbix/3.4/rhel/7/x86_64/zabbix-server-mysql-3.4.15-1.el7.x86_64.rpm 
+    - https://repo.zabbix.com/zabbix/3.4/rhel/7/x86_64/zabbix-web-3.4.15-1.el7.noarch.rpm 
+    - https://repo.zabbix.com/zabbix/3.4/rhel/7/x86_64/zabbix-web-mysql-3.4.15-1.el7.noarch.rpm
+    - https://repo.zabbix.com/non-supported/rhel/7/x86_64/fping-3.10-1.el7.x86_64.rpm
+    - https://repo.zabbix.com/non-supported/rhel/7/x86_64/iksemel-1.4-2.el7.centos.x86_64.rpm
+    - https://repo.zabbix.com/non-supported/rhel/7/x86_64/iksemel-devel-1.4-2.el7.centos.x86_64.rpm
+    - https://repo.zabbix.com/non-supported/rhel/7/x86_64/iksemel-utils-1.4-2.el7.centos.x86_64.rpm
+
+- name: Install Zabbix Rpms
+  shell:
+    chdir: /opt 
+    cmd: rpm -ivh iksemel-1.4-2.el7.centos.x86_64.rpm iksemel-devel-1.4-2.el7.centos.x86_64.rpm iksemel-utils-1.4-2.el7.centos.x86_64.rpm fping-3.10-1.el7.x86_64.rpm
+  ignore_errors: yes
+  args:
+    warn: false 
+
+- name: Install Zabbix 
+  shell: 
+    chdir: /opt
+    cmd: yum install -y zabbix-agent-3.4.15-1.el7.x86_64.rpm zabbix-server-mysql-3.4.15-1.el7.x86_64.rpm zabbix-web-3.4.15-1.el7.noarch.rpm zabbix-web-mysql-3.4.15-1.el7.noarch.rpm
+  ignore_errors: yes
+  args:
+    warn: false 
+
+- name: Copy the zabbix conf file
+  copy:
+    src: /etc/httpd/conf.d/zabbix.conf
+    dest: /etc/httpd/conf.d/zabbix.conf-{{ansible_date_time.iso8601}}
+    remote_src: yes
+
+- name:  Find database
+  shell: find /usr/share/ -name create.sql.gz 
+  register: create
+
+- name: Copy the zabbix-rabbit
+  copy:
+    src: '{{create.stdout}}'
+    dest: /root
+    remote_src: yes
+
+- name:  Update Zabbix conf file
+  shell: sed -i -e 's/# php_value/ php_value/g' -e 's/Europe/Asia/g'  -e 's/Riga/Kolkata/g'  /etc/httpd/conf.d/zabbix.conf
+  args:
+    warn: false 
+
+- name: Reload service httpd 
+  service:
+    name: httpd
+    state: reloaded
+
+- name: unzip the zabbix initial database
+  shell: gunzip /root/create.sql.gz 
+
+- name: Importing the zabbix initial database
+  shell: mysql zabbixdb < /root/create.sql
+  args:
+    warn: false 
+
+- name: Backuping original config file and Enabling Database Related Entries
+  copy:
+    src: /etc/zabbix/zabbix_server.conf
+    dest: /etc/zabbix/zabbix_server.conf-{{ansible_date_time.iso8601}}
+    remote_src: yes
+
+- name:  Update Databse in zabbix conf file
+  shell: sed -i -e 's/DBHost=/#DBHost=/g' -e 's/DBName=/#DBName=/g'  -e 's/DBUser=/#DBUser=/g' -e 's/DBPassword=/#DBPassword=/g' /etc/zabbix/zabbix_server.conf
+  args:
+    warn: false 
+
+- name: Update Databse  details in Zabbix conf file
+  lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    line: "{{item}}"
+    state: present
+  with_items:
+      - DBHost=localhost
+      - DBName=zabbixdb
+      - DBUser={{zabbixuser}}
+      - DBPassword={{zabbixpass}}
+
+- name: Installing required packages 
+  yum:
+    name: [ python2-pika, python-setuptools ]
+    state: present
+
+- name:  Install pika packages
+  shell: easy_install pika
+
+- name: Copy the  Zabbix server file 
+  copy:
+    src: zabbix.zip
+    dest: /opt/
+
+- name:  Untar the zabbix file
+  shell: unzip /opt/zabbix.zip
+
+- name: iframe
+  shell: find / -name charts-iframe.php
+  register: iframe
+
+- name: iframe-logout
+  shell: find / -name charts-iframe-logout.php
+  register: logout
+
+- name: Copy the iframe
+  copy:
+    src: '{{iframe.stdout}}'
+    dest: /usr/share/zabbix/
+    remote_src: yes
+
+- name: Copy the iframe-logout
+  copy:
+    src: '{{logout.stdout}}'
+    dest: /usr/share/zabbix/
+    remote_src: yes
+
+- name: move the header
+  shell: mv /usr/share/zabbix/include/page_header.php /usr/share/zabbix/include/page_header.php-org
+  args:
+    warn: false 
+  
+- name: page_header
+  shell: find / -name page_header.php
+  register: header
+  
+- name: Copy the page_header
+  copy:
+    src: '{{header.stdout}}'
+    dest: /usr/share/zabbix/include/
+    remote_src: yes
+
+- name: zabbix-rabbit
+  shell: find / -name zabbix-rabbitmq.py
+  register: rabbitmq
+
+- name: Copy the zabbix-rabbit
+  copy:
+    src: '{{rabbitmq.stdout}}'
+    dest:  /usr/lib/zabbix/alertscripts/
+    remote_src: yes
+
+- name: graphkey
+  shell: find / -name .graph-key
+  register: graphkey
+
+- name: Copy the graphkey
+  copy:
+    src: '{{graphkey.stdout}}'
+    dest: /usr/share/zabbix/
+    remote_src: yes
+  when: "'{{ graphkey.stdout }}' == '.graph-key' "
+
+- name: Start the Zabbix service
+  shell: "{{item}}"
+  with_items:
+    - systemctl enable zabbix-server 
+    - systemctl start zabbix-server
+    - systemctl enable zabbix-agent
+    - systemctl start zabbix-agent
+
+- name: Stop service firewalld 
+  service:
+    name: firewalld
+    state: stopped
+
+- name: Create a zabbix modules  directory 
+  file:
+    path: /usr/lib/zabbix/modules
+    state: directory
+
+- name: Download  Zabbix Modules
+  get_url: 
+    url: "{{item}}"
+    dest: /usr/lib/zabbix/modules/
+  with_items:
+    - https://github.com/LMacPhail/zabbix-history-influxdb/raw/master/dist/history_influxdb.so 
+    - https://raw.githubusercontent.com/LMacPhail/zabbix-history-influxdb/master/dist/history_influxdb.conf
+
+- name: Copy the  influxdb conf file 
+  copy:
+    src: /usr/lib/zabbix/modules/history_influxdb.conf
+    dest: /usr/lib/zabbix/modules/history_influxdb.conf-orig
+    remote_src: yes
+
+- name:  Update Databse in history_influxdb file
+  lineinfile:
+    dest: /usr/lib/zabbix/modules/history_influxdb.conf
+    regexp: '^InfluxDBName=zabbix'
+    line: '#InfluxDBName=zabbix'
+
+
+- name: Update Databse  details in Zabbix conf file
+  lineinfile:
+    path: /usr/lib/zabbix/modules/history_influxdb.conf
+    line: "{{item}}"
+    state: present
+  with_items:
+      - InfluxDBAddress=localhost
+      - InfluxDBPortNumber=8082
+      - InfluxDBName=Zabbixdb
+      - InfluxDBUser=root
+      - InfluxDBPassword="{{mysql_root_pass.stdout}}"
+
+- name: Copy the zabbix server file 
+  copy:
+    src: /etc/zabbix/zabbix_server.conf
+    dest: /etc/zabbix/zabbix_server.conf_orig_new
+    remote_src: yes
+
+
+- name: Update zabbix server conf file
+  lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    line: "{{item}}"
+    state: present
+  with_items:
+      - LoadModulePath=/usr/lib/zabbix/modules
+      - LoadModule=history_influxdb.so
+
+- name: Restarting the zabbix server
+  service:
+    name: zabbix-server
+    state: restarted
+
+- name: Copy the  Zabbix web conf file 
+  copy:
+    src: zbx_export_templates.xml
+    dest: /root/
+
+- name: Copy the  Zabbix web conf file 
+  copy:
+    src: zabbix.conf.php
+    dest: /etc/zabbix/web/
+
+- name: Creating a templates group 
+  zabbix_group:
+    server_url: http://127.0.0.1/zabbix
+    login_user: Admin
+    login_password: zabbix
+    host_groups:
+        - Templates/Wolf-Monitoring
+    state: present
+  
+- name: Import Zabbix templates from XML
+  zabbix_template:
+    server_url: http://127.0.0.1/zabbix
+    login_user: Admin
+    login_password: zabbix
+    template_xml: "{{ lookup('file', 'zbx_export_templates.xml') }}"
+    state: present
+
+- name: 'Create a script mediatype'
+  zabbix_mediatype:
+    name: "zabbix-rabbitmq"
+    server_url: "http://127.0.0.1/zabbix/"
+    login_user: Admin
+    login_password: zabbix
+    type: 'script'
+    script_name: 'zabbix-rabbitmq.py'
+    script_params:
+      - 'zabbix'
+      - '{ALERT.SUBJECT}'
+      - '{ALERT.MESSAGE}'
+
+- name: Update a new zabbix user.
+  community.zabbix.zabbix_user:
+    server_url: "http://127.0.0.1/zabbix/"
+    login_user: Admin
+    login_password: zabbix
+    username: Admin
+    name: Admin
+    surname: Administrator
+    usrgrps:
+      - Zabbix administrators
+    override_passwd: yes
+    passwd: '{{zabbix_Admin_pass.stdout}}'
+    lang: en_GB
+    theme: blue-theme
+    autologin: no
+    autologout: '0'
+    refresh: '30'
+    rows_per_page: '200'
+    after_login_url: ''
+    user_medias:
+      - mediatype: zabbix-rabbitmq
+        sendto: admin@assistanz.com
+        period: 1-7,00:00-24:00
+        severity:
+          not_classified: yes
+          information: yes
+          warning: yes
+          average: yes
+          high: yes
+          disaster: yes
+        active: yes
+    state: present
+
+- debug:
+    msg: '{{zabbix_Admin_pass.stdout}}'
+
+
+- name: Deploy trigger action
+  zabbix_action:
+    server_url: "http://127.0.0.1/zabbix/"
+    login_user: Admin
+    login_password: '{{zabbix_Admin_pass.stdout}}'
+    name: "Report problems to Zabbix administrators"
+    event_source: 'trigger'
+    state: present
+    status: enabled
+    esc_period: 60
+    default_subject: "{TRIGGER.STATUS} | {TRIGGER.NAME}"
+    default_message: "{TRIGGER.STATUS} | {TRIGGER.NAME} | {HOST.NAME} | {TRIGGER.SEVERITY} | {ITEM.VALUE} | {ITEM.KEY} | {TRIGGER.ID} | {ACTION.ID} | {EVENT.DATE} | {EVENT.TIME} | {EVENT.RECOVERY.VALUE} | {EVENT.RECOVERY.DATE} | {EVENT.RECOVERY.TIME} | {TRIGGER.DESCRIPTION} | {EVENT.RECOVERY.ID}"
+    operations:
+      - type: send_message
+        media_type: 'zabbix-rabbitmq'
+        send_to_users:
+          - 'Admin'
+    recovery_default_subject: "{TRIGGER.STATUS} | {TRIGGER.NAME}"
+    recovery_default_message : "{TRIGGER.STATUS} | {TRIGGER.NAME} | {HOST.NAME} | {TRIGGER.SEVERITY} | {ITEM.VALUE} | {ITEM.KEY} | {TRIGGER.ID} | {ACTION.ID} | {EVENT.DATE} | {EVENT.TIME} | {EVENT.RECOVERY.VALUE} | {EVENT.RECOVERY.DATE} | {EVENT.RECOVERY.TIME} | {TRIGGER.DESCRIPTION} | {EVENT.RECOVERY.ID}"
+    recovery_operations:
+      - type: send_message
+        media_type: 'zabbix-rabbitmq'
+        send_to_users:
+          - 'Admin'
+
+- name: Password file
+  shell: echo Zabbix  Admin password is '{{zabbix_Admin_pass.stdout}}' >> /root/zabbix-{{hostname.stdout}}
+
+- name: Copy password file
+  fetch:
+    src: /root/zabbix-{{hostname.stdout}}
+    dest: /root/
+    flat: yes
+
+

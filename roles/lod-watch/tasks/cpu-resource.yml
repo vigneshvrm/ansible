@@ -1,0 +1,52 @@
+
+
+- name: Get the top 10 process
+  shell: echo -e "CPU top 20  \n" >> load && top -bcn1 | head -n 17|tail -n -11 >> load
+
+- name: Get the last 10  Historical CPU Usage
+  shell: echo -e "Historical CPU Usage (sar -p) \n" >> load && sar -p | tail -n -15 >> load && echo -e "\n\n" >> load
+
+- name: Check if the process is MySQL
+  shell: top -bcn1 | head -n 8 |tail -n -1 | awk '{print $2}'
+  register: mysql
+
+- name: Mysql status
+  shell:  echo -e "Mysql status \n" >> load && mysqladmin stat >> load && echo -e "\n\n" >> load
+  register: mysqlstat
+
+- name:  Mysql process
+  shell:  echo -e "Mysql process \n" >> load && mysqladmin proc >> load && echo -e "\n\n" >> load
+  register: mysqlproc
+
+- name: HTTP connections by ip address in port 80
+  shell: echo -e " HTTP connections by ip address in port 80 \n" >> load &&	netstat -tn 2>/dev/null | grep ":80" | awk '{print $5}' | cut -d ':' -f1 | sort | uniq -c | sort -nr | head >> load &&	echo -e "\n\n" >> load
+
+- name: Total num HTTP connections in port 80
+  shell: 	echo -e " Total num HTTP connections in port 80 \n" >> load && 	netstat -an | grep :80 | wc -l >> load &&	echo -e "\n" >> load
+
+- name: HTTP connections by ip address in port 443
+  shell: echo -e " HTTP connections by ip address in port 443  \n" >> load &&	netstat -tn 2>/dev/null | grep ":443" | awk '{print $5}' | cut -d ':' -f1 | sort | uniq -c | sort -nr | head >> load &&	echo -e "\n\n" >> load
+
+- name: Total num HTTP connections in port 4443
+  shell: 	echo -e " Total num HTTP connections in port 443 \n" >> load && 	netstat -an | grep :443 | wc -l >> load &&	echo -e "\n" >> load
+
+- name: Network Connection States
+  shell: 	echo -e "Network Connection States  \n\n" >> load && 	netstat -ant | awk '{print $6}' | sort | uniq -c | sort -n >> load &&	echo -e "\n\n" >> load
+
+- name: check Syn_Sent connections
+  shell: echo -e "SYN_SENT count  \n\n" >> load && netstat -atnp | grep SYN_SENT | wc -l >> load  && echo -e "\n\n" >> load
+
+- name: check exim queue
+  shell: echo -e " exim queue  \n" >> load && exim -bpc >> load && echo -e "\n\n" >> load
+
+- name: check backup process running
+  shell: echo -e " backup process  \n" >> load && ps aux | grep backup  >> load && echo -e "\n\n" >> load
+
+- name: check Raid Sync running
+  shell: echo -e " Raid Sync  \n" >> load &&  cat /proc/mdstat  >> load && echo -e "\n\n" >> load 
+
+- name: Sites with traffic in the last 2 Min
+  shell: 	echo -e " Sites with traffic in the last  2 Min  \n" >> load && 	find /usr/local/apache/domlogs/ -maxdepth 1 -type f -mmin -2 | egrep -v 'offset|_log $' >> load && echo -e "\n\n" >> load
+
+- name: server Steal time
+  shell: 	echo -e " Server Steal time  \n" >> load && top -bcn1 | awk 'NR==3 {print $16}'  >> load && echo -e "\n\n" >> load

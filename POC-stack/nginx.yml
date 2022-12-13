@@ -1,0 +1,20 @@
+- hosts: centos
+  become: yes
+  become_user: root
+  tasks:
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+
+   - name: Install nginx
+     package: 
+      name:
+        - epel-release
+        - nginx
+      state: present
+
+   - name: Restart nginx
+     service:
+       name: nginx
+       state: started
+       enabled: yes

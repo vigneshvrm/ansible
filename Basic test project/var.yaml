@@ -1,0 +1,5 @@
+del_files:
+- /var/log/maillog-20220911
+- /var/log/maillog-20220912
+- /var/log/maillog-20220913
+- /var/log/maillog-20220914

@@ -1,0 +1,56 @@
+
+# # tasks file for ipaddr
+
+
+- name: Check if IP adddressis blocked in csf
+  shell: less "{{csf_deny}}" | grep {{IPaddress}}
+  register: lfd
+  failed_when: lfd  == 0
+
+- name: lfd-output
+  debug:
+    var: lfd.stdout_lines
+
+- name: Allow Ip adddress in csf
+  shell: csf -dr {{IPaddress}}
+  register: Allow
+  when: lfd.stdout.find(IPaddress) == 0
+
+- name: allow-output
+  debug:
+    var: Allow.stdout_lines
+
+- name: 'Check if IP adddress is in Host access '
+  shell: less "{{hosts_allow}}" | grep "deny all"
+  register: hosts
+
+- name: 'Check if the IP address already exist'
+  shell: less "{{hosts_allow}}" | grep "{{IPaddress}}"
+  register: present
+  failed_when: present == 0
+
+- name: 'Add IP adddress in Host access '
+  lineinfile:
+    path: "{{hosts_allow}}"
+    insertbefore: BOF
+    line: 'all {{IPaddress}}: allow'
+  when: hosts.stdout.find('deny') == 0
+
+
+- name: 'Check if IP adddress is blocked in imunify'
+  shell: 'ipset list | grep {{IPaddress}}'
+  register: imunify
+  failed_when: lfd  == 0
+
+- name: imunify-output
+  debug:
+   var: imunify.stdout_lines
+
+- name: 'Allow IP adddress in imunify'
+  shell: 'imunify360-agent blacklist ip delete {{IPaddress}} && imunify360-agent whitelist ip add {{IPaddress}}'
+  register: imunify-allow
+  when: imunify.stdout.find(IPaddress) == 0
+
+- name: imunify-allow-output
+  debug:
+    var: imunify-allow.stdout.lines

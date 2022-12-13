@@ -1,0 +1,6 @@
+---
+- hosts: assit1
+  become: true
+  become_user: root
+  roles:
+    - lod-watch

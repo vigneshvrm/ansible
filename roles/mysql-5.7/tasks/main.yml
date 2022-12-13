@@ -1,0 +1,24 @@
+---
+# tasks file for mysql-5.7
+
+
+
+- name:  Check if the os is Centos
+  import_tasks: centos-mysql.yaml
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Check if the os is Ubuntu18
+  import_tasks: ubuntu-mysql.yaml
+  when: ansible_facts['os_family'] == 'Debian' and  ansible_facts['distribution_major_version'] == "18"
+
+- name: Check if the os is Ubuntu20
+  import_tasks: ubuntu_20.yaml
+  when: ansible_facts['os_family'] == 'Debian' and  ansible_facts['distribution_major_version'] == "20"
+  
+# - debug:
+#     msg: Mysql root password is "{{mysql_root_pass.stdout}}"
+
+# - debug:
+#     msg: Mysql User password is "{{mysql_user_pass.stdout}}"
+
+

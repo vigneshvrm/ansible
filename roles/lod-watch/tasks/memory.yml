@@ -1,0 +1,74 @@
+
+- name: Install ps_mem if requried
+  package:
+    name: ps_mem
+    state: present
+
+- name: Get the top 10 process
+  shell: echo -e "Mem top 20  \n" >> memory &&  top -bmcn1 | head -n 17 | tail -n -11 >> memory
+
+- name: Get the last 10  Historical CPU Usage
+  shell: echo -e "Historical Memory Usage (sar -r) \n" >> memory && sar -r  | tail -n -15 >> memory && echo -e "\n\n" >> memory
+
+- name: Get server memroy Usage
+  shell:  echo -e "Free Memory (Mb) \n" >> memory && free -k >> memory && echo -e "\n\n" >> memory
+
+- name: HTTPD Memory Consumption
+  shell: HTTPDMEM=$(ps aux|grep httpd|awk '{sum+=$6} END {print sum}') && HTTPDMEMMEG=$((HTTPDMEM/1024)) && echo "HTTPD memory consumption:- $HTTPDMEM Kilobytes ($HTTPDMEMMEG Megabytes)" >> logwatch && echo -e "\n" >> logwatch
+
+- name: PHP Memory Consumption
+  shell: PHPMEM=$(ps aux|grep php|awk '{sum+=$6} END {print sum}') && PHPMEMMEG=$((PHPMEM/1024)) && echo "PHP memory consumption:- $PHPMEM Kilobytes ($PHPMEMMEG Megabytes)" >> logwatch && echo -e "\n" >> logwatch
+
+- name: High memeory consupmstion process
+  shell: echo -e "High memory consumption process \n" >> memory && ps_mem  | tail -n 20 >> memory && echo -e "\n\n" >> memory
+
+- name: Check if the process is MySQL
+  shell: top -bcn1 | head -n 8 |tail -n -1 | awk '{print $2}'
+  register: mysql
+
+- name: Mysql status
+  shell:  echo -e "Mysql status \n" >> memory && mysqladmin stat >> memory && echo -e "\n\n" >> memory
+  register: mysqlstat
+
+- name:  Mysql process
+  shell:  echo -e "Mysql process \n" >> memory && mysqladmin proc >> memory && echo -e "\n\n" >> memory
+  register: mysqlproc
+
+- name: HTTP connections by ip address in port 80
+  shell: echo -e " HTTP connections by ip address in port 80 \n" >> memory &&	netstat -tn 2>/dev/null | grep ":80" | awk '{print $5}' | cut -d ':' -f1 | sort | uniq -c | sort -nr | head >> memory &&	echo -e "\n\n" >> memory
+
+- name: Total num HTTP connections in port 80
+  shell: 	echo -e " Total num HTTP connections in port 80 \n" >> memory && 	netstat -an | grep :80 | wc -l >> memory &&	echo -e "\n" >> memory
+
+- name: HTTP connections by ip address in port 443
+  shell: echo -e " HTTP connections by ip address in port 443  \n" >> memory &&	netstat -tn 2>/dev/null | grep ":443" | awk '{print $5}' | cut -d ':' -f1 | sort | uniq -c | sort -nr | head >> memory &&	echo -e "\n\n" >> memory
+
+- name: Total num HTTP connections in port 4443
+  shell: 	echo -e " Total num HTTP connections in port 443 \n" >> memory && 	netstat -an | grep :443 | wc -l >> memory &&	echo -e "\n" >> memory
+
+- name: Network Connection States
+  shell: 	echo -e "Network Connection States  \n\n" >> memory && 	netstat -ant | awk '{print $6}' | sort | uniq -c | sort -n >> memory &&	echo -e "\n\n" >> memory
+
+- name: check Syn_Sent connections
+  shell: echo -e "SYN_SENT count  \n\n" >> memory && netstat -atnp | grep SYN_SENT | wc -l >> memory  && echo -e "\n\n" >> memory
+
+- name: check exim queue
+  shell: echo -e " exim queue  \n" >> memory && exim -bpc >> memory && echo -e "\n\n" >> memory
+
+- name: check backup process running
+  shell: echo -e " backup process  \n" >> memory && ps aux | grep backup  >> memory && echo -e "\n\n" >> memory
+
+- name: check Raid Sync running
+  shell: echo -e " Raid Sync  \n" >> memory &&  cat /proc/mdstat  >> memory && echo -e "\n\n" >> memory 
+
+- name: Sites with traffic in the last 2 Min
+  shell: 	echo -e " Sites with traffic in the last  2 Min  \n" >> memory && 	find /usr/local/apache/domlogs/ -maxdepth 1 -type f -mmin -2 | egrep -v 'offset|_log $' >> memory && echo -e "\n\n" >> memory
+
+- name: server Steal time
+  shell: 	echo -e " Server Steal time  \n" >> memory && top -bcn1 | awk 'NR==3 {print $16}'  >> memory && echo -e "\n\n" >> memory
+
+- name: Check for the out of memory
+  shell: echo -e " Out of memory triggred  \n" >> memory && less /var/log/messages | grep -i "out of memory" | tail -n 10 >> memory && echo -e "\n\n" >> memory
+
+- name: Check for the  swap usage 
+  shell: echo -e "Swap usage \n" >> memory && for file in /proc/*/status ; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done | sort -k 2 -n -r | head -n 20 >> memory && echo -e "\n\n" >> memory

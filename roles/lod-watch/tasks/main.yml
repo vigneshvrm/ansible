@@ -1,0 +1,56 @@
+---
+# tasks file for lod-watch
+
+## Conditions check
+
+- name: Get No of cores in the CPU
+  command: nproc --all
+  register: cores
+
+- name: Calculate the Server Load
+  shell: expr '{{cores.stdout}}' - 1
+  register: limit
+
+# - debug:
+#     msg: '{{limit.stdout}}'
+
+- name: Calculate server Threshold 
+  shell: free | awk 'FNR == 3 {print $4/($3+$4)*100-100}'| sed 's/-//g'
+  register: Threshold
+
+- name: Get the server 
+  shell: uptime  | awk '{print $11}' | cut -d ',' -f1 |  cut -d '.' -f1
+  register: load
+
+- name: Get the server IO
+  shell: top -bcn1 | awk 'NR==3 {print $10}'
+  register: IO
+
+- name: check if the inode limit reached
+  shell: df -i | awk '{print $5}'| grep "9[4-9][0-9]*" |  cut -d '%' -f1
+  register: inode
+
+- name: check if the disk usage reached 90%
+  shell: df -h | awk '{print $5}'| grep "9[4-9][0-9]*" |  cut -d '%' -f1
+  register: disk
+
+# - debug:
+#     msg: '{{inode.stdout|int}}'
+
+## playbooks
+
+- name: Execute the task is Load exixts
+  include_tasks: cpu-resource.yml
+  when: load.stdout|int > limit.stdout|int
+
+- name: Execute the task is Threshold exixts
+  include_tasks: memory.yml
+  when: Threshold.stdout|int > 85
+
+- name: Execute the task if inode limit reached
+  include_tasks: inode.yml
+  when: inode.stdout|int > 89 and load.stdout|int < limit.stdout|int
+
+- name: Execute the task if disk limit reached
+  include_tasks: diskusage.yml
+  when: disk.stdout|int > 89 and load.stdout|int < limit.stdout|int

@@ -1,0 +1,82 @@
+#MYSQL
+export WOLF_DB_HOST=localhost
+export WOLF_DB_USERNAME=stackbill
+export WOLF_DB_PASSWORD=wolfpass
+export WOLF_DB_PORT=3306
+
+#MONGO
+export WOLF_MONGO_HOST=localhost
+export WOLF_MONGO_USERNAME=stackbill
+export WOLF_MONGO_PASSWORD=wolfmonpass
+export WOLF_MONGO_PORT=27017
+
+#LOG
+export LOG_PATH=/var/log/stackbill/
+export WOLF_TOMCAT_BASE=/home/stackbill/tomcatbase/
+export LOG_MODE=INFO
+#export ODOLF_LOGBACK_PATH=/home/stackbill/theme/logback.xml
+
+#SSL
+export KEY_ENABLED=false
+export KEY_STORE=/home/stackbill/ssl_certs/commercial.jks
+export KEY_STORE_PASSWORD=AzlEtm3in
+export KEY_PASSWORD=AzlEtm3in
+export KEY_ALIAS=brascloud
+export KEY_PROTOCOL=TLS
+
+#OTHER
+export WOLF_RABBITMQ_HOST=rabbitip
+export WOLF_RABBITMQ_USERNAME=mqadmin
+export WOLF_RABBITMQ_PASSWORD=rabbitpass
+
+export RABBITMQ_NOTIFICATION_HOST=rabbitip
+export RABBITMQ_NOTIFICATION_USERNAME=mqadmin
+export RABBITMQ_NOTIFICATION_PASSWORD=rabbitpass
+
+export WOLF_CONSOLE_URL=http://10.61.61.250:8080/client/
+export CLOUDSTACK_LDAP_URL=http://10.61.61.250:8080/client/api
+export CLOUDSTACK_API_KEY=05_th75goxacex1Fc1J8l9AHXTCfxdHsTrxd4WIfMD4JN6w4p08EiEuFR9yP1C6WZVxsXocBqVDpfIPTQ9MD9w
+export CLOUDSTACK_SECRET_KEY=7Ljo6zdTpWiQrl68dSjQWEIZuUPLuC5rRvek7wkjCfCgApDKcJ8W7LsbBL2GhurRuwv1YsIPYNRsD1d0ciHMGg
+
+export WOLF_ODOLF_URL=http://localhost:8086/api
+export ZABBIX_MONITORING_APP_URL=http://control.zehost.live/advancedmonitoring/
+export ZABBIX_APP_URL=http://control.zehost.live/zabbixservice/connector/
+export NOTIFICATION_CONNECTOR_API=http://control.zehost.live/notificationservice/connector/notification/api
+export ZABBIX_URL=http://10.61.61.2/zabbix/api_jsonrpc.php
+export ZABBIX_SERVER_CHART_URL="http://control.zehost.live/zabbixgraph/zabbix/charts-iframe.php?form_refresh=1&fullscreen=0&usertoken="
+export ZABBIX_UI_HOST_WINDOWS_URL=http://control.zehost.live/download-agents/zabbix_agent-3.4.10_installer.zip
+export ZABBIX_UI_HOST_LINUX_URL=http://control.zehost.live/download-agents/install-agent.sh
+export CLOUD_APP_URL=http://control.zehost.live/#/index/login
+export ZABBIX_ADMIN_USER=adminstackbill
+export ZABBIX_USER_NAME=UvGkSFbeAuJZanUPgT6bKQ==
+export ZABBIX_USER_PASS=PQJPQgwfo+ZlHI9JDI2geQ==
+export ZABBIX_SECKEY=ab22996b80e4fb373de9ec995ac5f3ed
+export ZABBIX_UI_HOST_IP=185.95.215.18
+export TEMPLATE_GROUP=15
+export ADMIN_DOMAIN_CREATION=true
+export SHARED_NETWORK_CREATION=false
+export SIGNUP_COST=1
+export JPA_SHOW_SQL=true
+export WOLF_REQUEST_FOLDER=/
+export WOLF_REQUEST_ADMIN_FOLDER=/admin/
+export WOLF_REQUEST_HTML=
+export ACCESS_CONTROL_ALLOW_ORIGIN=*
+export ALLOW_ORIGIN_ACCESS_CONTROL=*
+
+#Email-Notification
+export EMAIL_SENDING_TYPE=JAVA_MAIL_SENDER
+
+#Fatura
+export RABBITMQ_EMAIL_EXCHANGE=wolf-email-in
+export RABBITMQ_USAGE_EXCHANGE=Wolf-Usage-Exchange
+export RABBITMQ_EMAIL=WolfEmailTemplate
+export RABBITMQ_USAGE=UsageQueue
+export WOLF_APP_URL=http://localhost:8080/api
+export ODOLF_LOGBACK_PATH=/home/stackbill/theme/logback.xml
+
+export ZABBIX_ALERT_QUEUE=alertqueueSTT
+export ZABBIX_RECOVERY_QUEUE=recoveryqueueSTT
+
+#Vault
+export VAULT_TOKEN=hvs.VuMedSGwmYapHKVHsrilVPKm
+export VAULT_SERVER_ENABLED=false

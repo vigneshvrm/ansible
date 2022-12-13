@@ -1,0 +1,130 @@
+- hosts: centos
+  become: yes
+  become_user: root
+  tasks:
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+
+   - name: Add stackbi become_user
+     user:
+       name: stackbill
+
+   - name: Create a directory
+     file:
+       path: /home/stackbill/{{item}}
+       owner: stackbill
+       group: stackbill
+       state: directory       
+     with_items:
+       - "profile/images/"
+       - "invoice/invoiceattachment/"
+       - "reports/englishtemplate/"
+       - "reports/zabbix/englishtemplates/"
+       - "reports/zabbix/othertemplates/"
+       - "theme/images/"
+
+   - name: Create a directory
+     file:
+       path: /home/stackbill/startup
+       owner: stackbill
+       group: stackbill
+       state: directory         
+
+   - name: Create a directory
+     file:
+       path: /var/log/stackbill
+       state: directory       
+
+
+   - name: Create a directory
+     file:
+       path: /var/www/html/{{item}}
+       state: directory       
+     with_items:
+        - stable_build
+        - admin
+
+   - name: Download stackbill service
+     get_url:
+       url: "{{ item }}"
+       dest: /etc/systemd/system
+     with_items:
+       - https://sp-poc.s3.amazonaws.com/systemd/acqio.service
+       - https://sp-poc.s3.amazonaws.com/systemd/billing.service
+       - https://sp-poc.s3.amazonaws.com/systemd/mailservice.service
+       - https://sp-poc.s3.amazonaws.com/systemd/mobbex.service
+       - https://sp-poc.s3.amazonaws.com/systemd/monitoring.service
+       - https://sp-poc.s3.amazonaws.com/systemd/stackbill-util.service
+       - https://sp-poc.s3.amazonaws.com/systemd/stackbill.service
+       - https://sp-poc.s3.amazonaws.com/systemd/vaultservice.service
+       - https://sp-poc.s3.amazonaws.com/systemd/fatura.service
+       - https://sp-poc.s3.amazonaws.com/systemd/notification.service
+
+       
+
+   - name: Download zabbix Rpms
+     get_url:
+       url: https://sp-poc.s3.amazonaws.com/Startup/startup.tar.gz
+       dest: /home/stackbill/startup
+
+   - name: Unarchive startup
+     unarchive:
+       src: /home/stackbill/startup/startup.tar.gz
+       dest: /home/stackbill/startup/
+       remote_src: yes
+
+   - name: Download stackbill images
+     get_url:
+       url: "{{ item }}"
+       dest: /home/stackbill/theme/images
+     with_items:
+       - https://sp-poc.s3.amazonaws.com/CSS/colors.css
+       - https://sp-poc.s3.amazonaws.com/CSS/screen.css
+
+   - name: Download stackbill theme
+     get_url:
+       url: https://sp-poc.s3.amazonaws.com/Startup/logback.xml
+       dest: /home/stackbill/theme/
+
+   - name: Updating permission
+     file:
+       path: "{{item}}"
+       owner: stackbill
+       group: stackbill
+       recurse : true
+     with_items:
+       - "/home/stackbill/"
+       - "/var/log/stackbill"
+
+   - name: Download stackbill images
+     get_url:
+       url: "{{ item }}"
+       dest: /tmp/
+     with_items:       
+       - https://sp-poc.s3.amazonaws.com/buildfiles/stable_build.tar.gz
+       - https://sp-poc.s3.amazonaws.com/buildfiles/admin.tar.gz
+       - https://sp-poc.s3.amazonaws.com/buildfiles/download-agents.tar.gz
+
+   - name: Unarchive startup
+     unarchive:
+       src: /tmp/{{item}}
+       dest: /var/www/html/
+       remote_src: yes
+     with_items:       
+       - "stable_build.tar.gz"
+       - "admin.tar.gz"
+       - "download-agents.tar.gz"
+
+   - name: Start the service
+     service:
+       name: '{{item}}'
+       state: started
+       enabled: yes     
+     with_items:
+       - stackbill
+       - billing
+       - monitoring 
+       - notification 
+       - mailservice 
+       - stackbill-util 

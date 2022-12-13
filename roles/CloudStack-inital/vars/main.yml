@@ -1,0 +1,8 @@
+---
+# vars file for CloudStack-inital
+
+    mysql_root_password: Cl0ud5tack
+    mysql_cloud_password: Cl0ud5tack
+    tmp_nfs_path: /mnt/nfs_share/
+    sec_nfs_ip: 192.168.3.226
+    sec_nfs_path: /mnt/nfs_share/

@@ -1,0 +1,77 @@
+---
+# tasks file for CloudStack-inital
+
+- name: Initial Setup
+  package:
+   name:
+     - openntpd 
+     - htop 
+     - tar
+   state: present
+
+- name: add a key
+  command: wget -O - http://download.cloudstack.org/release.asc|apt-key add -
+
+- name: Adding cloud stack source list
+  command: echo deb http://download.cloudstack.org/ubuntu focal 4.17  > /etc/apt/sources.list.d/cloudstack.list
+
+- name: Run the update 
+  apt:
+    update_cache: yes
+
+- name: Install the packages
+  package:
+    name:
+     - cloudstack-management
+     - mysql-server
+     - cloudstack-usage 
+     - MySQL-python
+     - libselinux-python
+    state: present
+
+- name: Ensure cloudstack specfic my.cnf lines are present
+  lineinfile: 
+   dest: /etc/my.cnf 
+   regexp: "{{item}}"
+   insertafter: symbolic-links=0
+   line: "{{item}}"
+   with_items:
+    - skip-name-resolve
+    - innodb_rollback_on_timeout=1
+    - innodb_lock_wait_timeout=600
+    - max_connections=350
+    - log-bin=mysql-bin
+    - binlog-format = ROW
+
+- name: Ensure MySQL service is started
+  service: 
+    name: mysqld 
+    state: started
+    enabled: yes
+
+- name: Ensure root password is set
+  mysql_user: 
+    user: root 
+    password: $mysql_root_password 
+    host: localhost
+  ignore_errors: true
+
+- name: Ensure MySQL service is Re-started
+  service: 
+    name: mysqld 
+    state: restarted
+  
+- name: Ensure secondary storage mount exists
+  file: path={{ tmp_nfs_path }} state=directory
+
+- name: Ensure  NFS storage is mounted
+  mount: name={{ tmp_nfs_path }} src={{ sec_nfs_ip }}:{{sec_nfs_path }} fstype=nfs state=mounted opts=nolock
+
+- name: Seed secondary storage
+  shell: |
+        /usr/share/cloudstack-common/scripts/storage/secondary/cloud-install-sys-tmplt -m {{ tmp_nfs_path }} -u https://download.cloudstack.org/templates/4.2/systemvmtemplate-2013-06-12-master-kvm.qcow2.bz2 -h kvm -F
+        /usr/share/cloudstack-common/scripts/storage/secondary/cloud-install-sys-tmplt -m {{ tmp_nfs_path }} -u https://download.cloudstack.org/templates/4.2/systemvmtemplate-2013-07-12-master-xen.vhd.bz2 -h xenserver -F
+        /usr/share/cloudstack-common/scripts/storage/secondary/cloud-install-sys-tmplt -m {{ tmp_nfs_path }} -u https://download.cloudstack.org/templates/4.2/systemvmtemplate-4.2-vh7.ov -h vmware -F
+
+
+

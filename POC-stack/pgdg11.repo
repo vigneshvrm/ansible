@@ -1,0 +1,5 @@
+[OurRepo]
+name=PostgreSQL11
+baseurl=file:///etc/yum.repos.d/pgdg11
+enabled=1
+gpgcheck=0

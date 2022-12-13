@@ -1,0 +1,15 @@
+- hosts: centos
+  become: yes
+  become_user: root
+  tasks:
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+
+   - name: Download zabbix Rpms
+     get_url:
+       url: https://sp-poc.s3.amazonaws.com/Stackbill-Util/stackbill-utils
+       dest: /usr/bin/
+     
+   - name: Set execute permission
+     command: chmod +x /usr/bin/stackbill-utils

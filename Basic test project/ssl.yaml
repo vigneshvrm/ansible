@@ -1,0 +1,54 @@
+- hosts: localhost
+  become: yes
+  become_user: root
+  vars_prompt:
+    - name: Domain
+      prompt: Enter the Domain name:-
+      private: no
+
+  tasks:
+    - name: Check the Whether it's hostname
+      shell: hostname
+      register: host
+
+    - debug:
+          var: host
+          
+    - name: Install SSl for the Hostname
+      shell: /usr/local/cpanel/bin/checkallsslcerts
+      register: Host_ssl
+      when: host.stdout.find(Domain) == 0
+
+    - debug: msg="{{ Host_ssl.stdout }}"          
+
+    - name: Check the Whether it's Domain
+      shell: /scripts/whoowns {{Domain}}
+      register: user1
+      failed_when: user1 == 0
+
+    - set_fact:
+       uesr_out: "{{user1.stdout}}"
+
+    - debug:
+          var: user1.stdout
+
+    - name: Check user for te Domain
+      shell: less /etc/trueuserdomains  | grep {{Domain}} | awk '{print $2}'
+      register: user
+      failed_when: user == 0
+
+    - debug:
+          var: user.stdout
+
+    - name: Install SSl for the Domain
+      shell: '/usr/local/cpanel/bin/autossl_check --user={{uesr_out}}'
+      register: SSL_domain
+      when: user.stdout  == uesr_out and host.stdout.find(Domain) == 0
+
+    - debug:
+          var: SSL_domain
+
+
+
+
+
