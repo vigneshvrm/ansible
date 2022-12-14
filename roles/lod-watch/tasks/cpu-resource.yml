@@ -38,18 +38,23 @@
 
 - name: check exim queue
   shell: echo -e " exim queue  \n" >> load && exim -bpc >> load && echo -e "\n\n" >> load
+  ignore_errors: true
 
 - name: check backup process running
   shell: echo -e " backup process  \n" >> load && ps aux | grep backup  >> load && echo -e "\n\n" >> load
 
 - name: check Raid Sync running
   shell: echo -e " Raid Sync  \n" >> load &&  cat /proc/mdstat  >> load && echo -e "\n\n" >> load 
+  ignore_errors: true
+
 
 - name: Sites with traffic in the last 2 Min
   shell: 	echo -e " Sites with traffic in the last  2 Min  \n" >> load && 	find /usr/local/apache/domlogs/ -maxdepth 1 -type f -mmin -2 | egrep -v 'offset|_log $' >> load && echo -e "\n\n" >> load
+  ignore_errors: true
 
 - name: server Steal time
   shell: 	echo -e " Server Steal time  \n" >> load && top -bcn1 | awk 'NR==3 {print $16}'  >> load && echo -e "\n\n" >> load
+  ignore_errors: true
 
 
 - name: encode the file to base64
@@ -61,3 +66,4 @@
     method: POST
     src: loadencode.txt
     remote_src: yes
+  ignore_errors: true

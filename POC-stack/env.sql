@@ -14,21 +14,21 @@ CREATE TABLE IF NOT EXISTS `env_configurations`(
 TRUNCATE TABLE `env_configurations`;
 
 /* MONGO CONFIG */
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.db.mongo.host', 'localhost');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.db.mongo.host', 'mongoip');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.db.mongo.username', 'stackbill');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.db.mongo.password', 's9FiK31T*ASK');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.db.mongo.password', 'stackbillpass');
 
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('billing', 'app.billing.db.mongo.host', 'localhost');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('billing', 'app.billing.db.mongo.host', 'mongoip');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('billing', 'app.billing.db.mongo.username', 'stackbill');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('billing', 'app.billing.db.mongo.password', 's9FiK31T*ASK');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('billing', 'app.billing.db.mongo.password', 'stackbillpass');
 
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.db.mongo.host', 'localhost');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.db.mongo.host', 'mongoip');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.db.mongo.username', 'stackbill');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.db.mongo.password', 's9FiK31T*ASK');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.db.mongo.password', 'stackbillpass');
 
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications', 'app.notification.db.mongo.host', 'localhost');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications', 'app.notification.db.mongo.host', 'mongoip');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications', 'app.notification.db.mongo.username', 'stackbill');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications', 'app.notification.db.mongo.password', 's9FiK31T*ASK');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications', 'app.notification.db.mongo.password', 'stackbillpass');
 
 /* SSL CONFIG */
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'server.ssl.enabled', 'false');
@@ -146,17 +146,17 @@ INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications',
 
 /* STACKBILL CONFIG */
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.odolf.url', 'http://localhost:8086/api');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.portal.url', 'http://control.zehost.live/advancedmonitoring/');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.connector.url', 'http://control.zehost.live/zabbixservice/connector/');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.portal.url', 'http://control.zehost.live/#/index/login');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.chart.url', 'http://control.zehost.live/zabbixgraph/charts-iframe.php?form_refresh=1&fullscreen=1&usertoken=');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.agent.windows', 'http://control.zehost.live/download-agents/zabbix_agent-3.4.10_installer.zip');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.agent.linux', 'http://control.zehost.live/download-agents/zabbix-files.tar.gz');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.portal.url', 'http://my.domain.com/advancedmonitoring/');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.connector.url', 'http://my.domain.com/zabbixservice/connector/');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.portal.url', 'http://my.domain.com/#/index/login');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.chart.url', 'http://my.domain.com/zabbixgraph/charts-iframe.php?form_refresh=1&fullscreen=1&usertoken=');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.agent.windows', 'http://my.domain.com/download-agents/zabbix_agent-3.4.10_installer.zip');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.agent.linux', 'http://my.domain.com/download-agents/zabbix-files.tar.gz');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.util.url', 'http://localhost:9096');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.server.host', '185.95.215.18');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'server.accessControlAllowOrigin', '*');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.encrypted.username', 'UvGkSFbeAuJZanUPgT6bKQ==');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.encrypted.password', 'PQJPQgwfo+ZlHI9JDI2geQ==');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.zabbix.encrypted.password', 'Encryptedpass');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.portal.captcha', '6LcUfU8UAAAAALoAU6xDviMsje8nByXovynikDvG');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'app.stackbill.initialConfiguration.admindomaincreation', 'true');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'resource.network.shared', 'false');
@@ -174,20 +174,20 @@ INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'ap
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('billing', 'app.billing.template.invoice-path', '/home/stackbill/invoice/invoiceattachment/');
 
 /* KONG CONFIG */
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'kong.api.gateway.swaggerHost', 'control.zehost.live');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'kong.api.gateway.swaggerHost', 'my.domain.com');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'kong.api.gateway.url', 'http://localhost:8001/');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'kong.api.gateway.stackbill', 'http://control.zehost.live/apidocs/restapi');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('stackbill', 'kong.api.gateway.stackbill', 'http://my.domain.com/apidocs/restapi');
 
 
 /* ZABBIX CONFIG */
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.server.admin.username', 'adminstackbill');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.server.admin.encrypted.username', 'UvGkSFbeAuJZanUPgT6bKQ==');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.server.admin.encrypted.password', 'PQJPQgwfo+ZlHI9JDI2geQ==');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.server.admin.encrypted.password', 'Encryptedpass');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.server.proxyUrl', 'http://10.61.61.2/zabbix/api_jsonrpc.php');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.server.chart.url', 'http://control.zehost.live/zabbixgraph/charts-iframe.php?form_refresh=1&fullscreen=1&usertoken=');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.notification.url', 'http://control.zehost.live/notificationservice/connector/notification/api');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.stackbill.portalUrl', 'http://control.zehost.live/#/index/login');
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.cors.access-control', 'http://control.zehost.live');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.server.chart.url', 'http://my.domain.com/zabbixgraph/charts-iframe.php?form_refresh=1&fullscreen=1&usertoken=');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.notification.url', 'http://my.domain.com/notificationservice/connector/notification/api');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.stackbill.portalUrl', 'http://my.domain.com/#/index/login');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.cors.access-control', 'http://my.domain.com');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.template.english', '/home/stackbill/reports/zabbix/englishtemplates/');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.template.others', '/home/stackbill/reports/zabbix/othertemplates/');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.zabbix.server.secKey', 'ab22996b80e4fb373de9ec995ac5f3ed');
@@ -199,7 +199,7 @@ INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Zabbix', 'app.z
 
 
 /* NOTIFICATION CONFIG */
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications', 'app.notification.cors.access-control', 'http://control.zehost.live');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications', 'app.notification.cors.access-control', 'http://my.domain.com');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications', 'app.notification.velocity.resourcePath', '/home/stackbill/theme/');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications', 'app.notification.template.english', '/home/stackbill/reports/zabbix/englishtemplates/');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications', 'app.notification.template.portuguese', '/home/stackbill/reports/zabbix/othertemplates/');
@@ -207,5 +207,5 @@ INSERT INTO `env_configurations` (type, keyname, value) VALUES ('Notifications',
 
 
 /* MAIL CONFIG */
-INSERT INTO `env_configurations` (type, keyname, value) VALUES ('mail', 'server.accessControlAllowOrigin', 'http://control.zehost.live');
+INSERT INTO `env_configurations` (type, keyname, value) VALUES ('mail', 'server.accessControlAllowOrigin', 'http://my.domain.com');
 INSERT INTO `env_configurations` (type, keyname, value) VALUES ('mail', 'app.mail.emailconfig.template', '/home/stackbill/emailtemplate/');

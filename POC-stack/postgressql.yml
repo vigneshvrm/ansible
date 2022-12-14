@@ -1,6 +1,6 @@
 # ansible-galaxy collection install community.postgresql
 
-- hosts: centos3
+- hosts: centos
   become: yes
   become_user: root
   tasks:
@@ -45,7 +45,7 @@
    - name: Download requried files
      get_url:
        url: https://sp-poc.s3.amazonaws.com/other-files/pgdg11.repo
-       dest: /root/
+       dest: /etc/yum.repos.d/
    
    - name: copy the postgresql repo
      unarchive:      

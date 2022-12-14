@@ -39,14 +39,14 @@ export CLOUDSTACK_API_KEY=05_th75goxacex1Fc1J8l9AHXTCfxdHsTrxd4WIfMD4JN6w4p08EiE
 export CLOUDSTACK_SECRET_KEY=7Ljo6zdTpWiQrl68dSjQWEIZuUPLuC5rRvek7wkjCfCgApDKcJ8W7LsbBL2GhurRuwv1YsIPYNRsD1d0ciHMGg
 
 export WOLF_ODOLF_URL=http://localhost:8086/api
-export ZABBIX_MONITORING_APP_URL=http://control.zehost.live/advancedmonitoring/
-export ZABBIX_APP_URL=http://control.zehost.live/zabbixservice/connector/
-export NOTIFICATION_CONNECTOR_API=http://control.zehost.live/notificationservice/connector/notification/api
+export ZABBIX_MONITORING_APP_URL=http://my.domain.com/advancedmonitoring/
+export ZABBIX_APP_URL=http://my.domain.com/zabbixservice/connector/
+export NOTIFICATION_CONNECTOR_API=http://my.domain.com/notificationservice/connector/notification/api
 export ZABBIX_URL=http://10.61.61.2/zabbix/api_jsonrpc.php
-export ZABBIX_SERVER_CHART_URL="http://control.zehost.live/zabbixgraph/zabbix/charts-iframe.php?form_refresh=1&fullscreen=0&usertoken="
-export ZABBIX_UI_HOST_WINDOWS_URL=http://control.zehost.live/download-agents/zabbix_agent-3.4.10_installer.zip
-export ZABBIX_UI_HOST_LINUX_URL=http://control.zehost.live/download-agents/install-agent.sh
-export CLOUD_APP_URL=http://control.zehost.live/#/index/login
+export ZABBIX_SERVER_CHART_URL="http://my.domain.com/zabbixgraph/zabbix/charts-iframe.php?form_refresh=1&fullscreen=0&usertoken="
+export ZABBIX_UI_HOST_WINDOWS_URL=http://my.domain.com/download-agents/zabbix_agent-3.4.10_installer.zip
+export ZABBIX_UI_HOST_LINUX_URL=http://my.domain.com/download-agents/install-agent.sh
+export CLOUD_APP_URL=http://my.domain.com/#/index/login
 export ZABBIX_ADMIN_USER=adminstackbill
 export ZABBIX_USER_NAME=UvGkSFbeAuJZanUPgT6bKQ==
 export ZABBIX_USER_PASS=PQJPQgwfo+ZlHI9JDI2geQ==

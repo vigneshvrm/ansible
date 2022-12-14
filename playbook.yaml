@@ -1,5 +1,5 @@
 ---
-- hosts: assit1
+- hosts: centos3
   become: true
   become_user: root
   roles:

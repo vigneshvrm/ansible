@@ -7,7 +7,10 @@
       private: no
     - name: Domainname
       prompt: what is Domian name
-      private: no     
+      private: no   
+    - name: cloudstack
+      prompt: what is cloudstack server IP
+      private: no       
   tasks:
 
    - name: Install supporting Packages
@@ -37,8 +40,8 @@
      get_url:
        url: '{{item}}'
        dest: /root/
-      with_items:
-         - https://sp-poc.s3.amazonaws.com/other-files/bashrc
+     with_items:
+         -https://sp-poc.s3.amazonaws.com/other-files/bsahrc.txt
          - https://sp-poc.s3.amazonaws.com/other-files/EncryptionUtil.class
          - https://sp-poc.s3.amazonaws.com/other-files/EncryptionUtil.java
 
@@ -69,7 +72,7 @@
      register: zabbix
 
    - name: Encrypted password
-     shell: java EncryptionUtil {{zabbix_Admin_pass.stdout}}  bt/dLcRhhK/LYdTchNXxsQ== | head -n 1
+     shell: java EncryptionUtil {{zabbix_stackbill_pass.stdout}}  bt/dLcRhhK/LYdTchNXxsQ== | head -n 1
      register: Encrypted_stack_bill     
 
    - name: Get the Ip address
@@ -78,7 +81,7 @@
 
    - name: Replace the credentails
      replace:
-       path: /tmp/bsahrc.txt
+       path: /root/bsahrc.txt
        regexp: "{{item.find}}"
        replace: "{{item.replace}}"
      with_items:       
@@ -86,16 +89,16 @@
        - {find: 'wolfmonpass', replace: '{{monogo.stdout}}' }
        - {find: 'rabbitpass', replace: '{{rabbitpass.stdout}}' }
        - {find: '10.61.61.2', replace: '{{Ipaddress.stdout}}' }
-       - {find: 'control.zehost.live', replace: '{{Domainname}}' }  
+       - {find: 'my.domain.com', replace: '{{Domainname}}' }  
        - {find: '185.95.215.18', replace: '{{pubipaddress.stdout}}' }     
-       - {find: '10.61.61.250', replace: '{{sqlservers}}' }
+       - {find: '10.61.61.250', replace: '{{cloudstack}}' }
        - {find: 'WOLF_MONGO_HOST=localhost', replace: 'WOLF_MONGO_HOST={{sqlservers}}' }
        - {find: 'WOLF_DB_HOST=localhost', replace: 'WOLF_DB_HOST={{sqlservers}}' }
        - {find: 'ab22996b80e4fb373de9ec995ac5f3ed', replace: '{{Encrypted_stack_bill.stdout}}' }
 
 
    - name: copy the content to bashrc    
-     shell: cat /tmp/bsahrc.txt >> /root/.bashrc
+     shell: cat /root/bsahrc.txt >> /root/.bashrc
 
    - name: Password file
      shell: echo "{{Encrypted_stack_bill.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-Encrypted_stack_bill     
@@ -103,6 +106,8 @@
    - name: Password file
      shell: echo "{{Domainname}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-Domainname     
 
+   - name: Password file
+     shell: echo "{{cloudstack}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-cloudstackip 
 
    - name: Copy password file
      fetch:
@@ -112,3 +117,4 @@
      with_items:
        - Password-{{Ipaddress.stdout}}-Encrypted_stack_bill 
        - Password-{{Ipaddress.stdout}}-Domainname
+       - Password-{{Ipaddress.stdout}}-cloudstackip 

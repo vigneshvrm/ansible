@@ -193,10 +193,16 @@
        - {find: 'DBUser=', replace: 'DBUser= zabbix' }
        - {find: 'DBPassword=', replace: 'DBPassword= {{dbp.stdout}}' }
 
-   - name: create a copy of the zabbix.conf.php
-     copy:
-       src: zabbix.conf.php
+  #  - name: create a copy of the zabbix.conf.php
+  #    copy:
+  #      src: zabbix.conf.php
+  #      dest: /etc/zabbix/web/
+
+   - name: Download requried files
+     get_url:
+       url: https://sp-poc.s3.amazonaws.com/other-files/zabbix.conf.php
        dest: /etc/zabbix/web/
+
 
    - name: Replace the zabbix config
      replace:
@@ -246,7 +252,7 @@
      copy:
        src: /root/zabbixfiles/{{item}}
        dest: /usr/share/zabbix/
-     remote_src: yes
+       remote_src: yes
      with_items:
        - charts-iframe.php
        - charts-iframe-logout.php
@@ -261,7 +267,6 @@
      copy:
        src: /root/zabbixfiles/page_header.php
        dest: /usr/share/zabbix/include/
-      
        remote_src: yes
 
    - name: Copy PHP files to required location
@@ -296,10 +301,15 @@
        state: restarted
        enabled: yes
 
-   - name: Copy the  Zabbix web conf file 
-     copy:
-        src: zbx_export_templates.xml
-        dest: /root/
+  #  - name: Copy the  Zabbix web conf file 
+  #    copy:
+  #       src: zbx_export_templates.xml
+  #       dest: /root/
+
+   - name: Download template
+     get_url:
+       url: https://sp-poc.s3.amazonaws.com/other-files/zbx_export_templates.xml
+       dest: /root/
 
    - name: Creating a templates group 
      zabbix_group:
@@ -336,9 +346,9 @@
         server_url: "http://127.0.0.1/zabbix/"
         login_user: Admin
         login_password: zabbix
-        username: Admin
-        name: Admin
-        surname: Administrator
+        username: adminstackbill
+        name: adminstackbill
+        surname: adminstackbill
         usrgrps:
           - Zabbix administrators
         override_passwd: yes
@@ -364,37 +374,37 @@
             active: yes
         state: present
 
-   - name: create a new zabbix user.
-     community.zabbix.zabbix_user:
-       server_url: "http://127.0.0.1/zabbix/"
-       login_user: Admin
-       login_password: '{{zabbix_Admin_pass.stdout}}'
-       username: adminstackbill
-       name: adminstackbill
-       surname: adminstackbill
-       usrgrps:
-          - Zabbix administrators
-       passwd: '{{zabbix_stackbill_pass.stdout}}'
-       lang: en_GB
-       theme: blue-theme
-       autologin: no
-       autologout: '0'
-       refresh: '30'
-       rows_per_page: '200'
-       after_login_url: ''
-       user_medias:
-          - mediatype: zabbix-rabbitmq
-            sendto: admin@assistanz.com
-            period: 1-7,00:00-24:00
-            severity:
-              not_classified: yes
-              information: yes
-              warning: yes
-              average: yes
-              high: yes
-              disaster: yes
-            active: yes
-       state: present      
+  #  - name: create a new zabbix user.
+  #    community.zabbix.zabbix_user:
+  #      server_url: "http://127.0.0.1/zabbix/"
+  #      login_user: Admin
+  #      login_password: '{{zabbix_Admin_pass.stdout}}'
+  #      username: adminstackbill
+  #      name: adminstackbill
+  #      surname: adminstackbill
+  #      usrgrps:
+  #         - Zabbix administrators
+  #      passwd: '{{zabbix_stackbill_pass.stdout}}'
+  #      lang: en_GB
+  #      theme: blue-theme
+  #      autologin: no
+  #      autologout: '0'
+  #      refresh: '30'
+  #      rows_per_page: '200'
+  #      after_login_url: ''
+  #      user_medias:
+  #         - mediatype: zabbix-rabbitmq
+  #           sendto: admin@assistanz.com
+  #           period: 1-7,00:00-24:00
+  #           severity:
+  #             not_classified: yes
+  #             information: yes
+  #             warning: yes
+  #             average: yes
+  #             high: yes
+  #             disaster: yes
+  #           active: yes
+  #      state: present      
 
    - debug:
        msg: '{{zabbix_Admin_pass.stdout}}'
@@ -403,7 +413,7 @@
    - name: Deploy trigger action
      zabbix_action:
         server_url: "http://127.0.0.1/zabbix/"
-        login_user: Admin
+        login_user: adminstackbill
         login_password: '{{zabbix_Admin_pass.stdout}}'
         name: "Report problems to Zabbix administrators"
         event_source: 'trigger'
@@ -445,6 +455,9 @@
    - name: Password file
      shell: echo "{{zabbix_stackbill_pass.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbix_stackbill_pass
 
+   - name: Password file
+     shell: echo "{{zabbix_Admin_pass.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbix_Admin_pass
+
    - name: Copy password file
      fetch:
         src: /root/Password-{{Ipaddress.stdout}}/{{item}}
@@ -455,4 +468,5 @@
        - Password-{{Ipaddress.stdout}}-zabbixadmin
        - Password-{{Ipaddress.stdout}}-publicipZabbix
        - Password-{{Ipaddress.stdout}}-zabbix_stackbill_pass
+       - Password-{{Ipaddress.stdout}}-zabbix_Admin_pass
  
