@@ -341,14 +341,40 @@
           - '{ALERT.SUBJECT}'
           - '{ALERT.MESSAGE}'
 
+
+   - name: Deploy trigger action
+     zabbix_action:
+        server_url: "http://127.0.0.1/zabbix/"
+        login_user: Admin
+        login_password: zabbix
+        name: "Report problems to Zabbix administrators"
+        event_source: 'trigger'
+        state: present
+        status: enabled
+        esc_period: 60
+        default_subject: "{TRIGGER.STATUS} | {TRIGGER.NAME}"
+        default_message: "{TRIGGER.STATUS} | {TRIGGER.NAME} | {HOST.NAME} | {TRIGGER.SEVERITY} | {ITEM.VALUE} | {ITEM.KEY} | {TRIGGER.ID} | {ACTION.ID} | {EVENT.DATE} | {EVENT.TIME} | {EVENT.RECOVERY.VALUE} | {EVENT.RECOVERY.DATE} | {EVENT.RECOVERY.TIME} | {TRIGGER.DESCRIPTION} | {EVENT.RECOVERY.ID}"
+        operations:
+          - type: send_message
+            media_type: 'zabbix-rabbitmq'
+            send_to_users:
+              - 'Admin'
+        recovery_default_subject: "{TRIGGER.STATUS} | {TRIGGER.NAME}"
+        recovery_default_message : "{TRIGGER.STATUS} | {TRIGGER.NAME} | {HOST.NAME} | {TRIGGER.SEVERITY} | {ITEM.VALUE} | {ITEM.KEY} | {TRIGGER.ID} | {ACTION.ID} | {EVENT.DATE} | {EVENT.TIME} | {EVENT.RECOVERY.VALUE} | {EVENT.RECOVERY.DATE} | {EVENT.RECOVERY.TIME} | {TRIGGER.DESCRIPTION} | {EVENT.RECOVERY.ID}"
+        recovery_operations:
+          - type: send_message
+            media_type: 'zabbix-rabbitmq'
+            send_to_users:
+            - 'Admin'
+
    - name: Update a new zabbix user
      community.zabbix.zabbix_user:
         server_url: "http://127.0.0.1/zabbix/"
         login_user: Admin
         login_password: zabbix
-        username: adminstackbill
-        name: adminstackbill
-        surname: adminstackbill
+        username: Admin
+        name: Admin
+        surname: Admin
         usrgrps:
           - Zabbix administrators
         override_passwd: yes
@@ -374,66 +400,43 @@
             active: yes
         state: present
 
-  #  - name: create a new zabbix user.
-  #    community.zabbix.zabbix_user:
-  #      server_url: "http://127.0.0.1/zabbix/"
-  #      login_user: Admin
-  #      login_password: '{{zabbix_Admin_pass.stdout}}'
-  #      username: adminstackbill
-  #      name: adminstackbill
-  #      surname: adminstackbill
-  #      usrgrps:
-  #         - Zabbix administrators
-  #      passwd: '{{zabbix_stackbill_pass.stdout}}'
-  #      lang: en_GB
-  #      theme: blue-theme
-  #      autologin: no
-  #      autologout: '0'
-  #      refresh: '30'
-  #      rows_per_page: '200'
-  #      after_login_url: ''
-  #      user_medias:
-  #         - mediatype: zabbix-rabbitmq
-  #           sendto: admin@assistanz.com
-  #           period: 1-7,00:00-24:00
-  #           severity:
-  #             not_classified: yes
-  #             information: yes
-  #             warning: yes
-  #             average: yes
-  #             high: yes
-  #             disaster: yes
-  #           active: yes
-  #      state: present      
+   - name: create a new zabbix user.
+     community.zabbix.zabbix_user:
+       server_url: "http://127.0.0.1/zabbix/"
+       login_user: Admin
+       login_password: '{{zabbix_Admin_pass.stdout}}'
+       username: adminstackbill
+       name: adminstackbill
+       surname: adminstackbill
+       usrgrps:
+          - Zabbix administrators
+       passwd: '{{zabbix_stackbill_pass.stdout}}'
+       lang: en_GB
+       theme: blue-theme
+       autologin: no
+       autologout: '0'
+       refresh: '30'
+       rows_per_page: '200'
+       after_login_url: ''
+       user_medias:
+          - mediatype: zabbix-rabbitmq
+            sendto: admin@assistanz.com
+            period: 1-7,00:00-24:00
+            severity:
+              not_classified: yes
+              information: yes
+              warning: yes
+              average: yes
+              high: yes
+              disaster: yes
+            active: yes
+       state: present      
 
    - debug:
        msg: '{{zabbix_Admin_pass.stdout}}'
 
 
-   - name: Deploy trigger action
-     zabbix_action:
-        server_url: "http://127.0.0.1/zabbix/"
-        login_user: adminstackbill
-        login_password: '{{zabbix_Admin_pass.stdout}}'
-        name: "Report problems to Zabbix administrators"
-        event_source: 'trigger'
-        state: present
-        status: enabled
-        esc_period: 60
-        default_subject: "{TRIGGER.STATUS} | {TRIGGER.NAME}"
-        default_message: "{TRIGGER.STATUS} | {TRIGGER.NAME} | {HOST.NAME} | {TRIGGER.SEVERITY} | {ITEM.VALUE} | {ITEM.KEY} | {TRIGGER.ID} | {ACTION.ID} | {EVENT.DATE} | {EVENT.TIME} | {EVENT.RECOVERY.VALUE} | {EVENT.RECOVERY.DATE} | {EVENT.RECOVERY.TIME} | {TRIGGER.DESCRIPTION} | {EVENT.RECOVERY.ID}"
-        operations:
-          - type: send_message
-            media_type: 'zabbix-rabbitmq'
-            send_to_users:
-              - 'Admin'
-        recovery_default_subject: "{TRIGGER.STATUS} | {TRIGGER.NAME}"
-        recovery_default_message : "{TRIGGER.STATUS} | {TRIGGER.NAME} | {HOST.NAME} | {TRIGGER.SEVERITY} | {ITEM.VALUE} | {ITEM.KEY} | {TRIGGER.ID} | {ACTION.ID} | {EVENT.DATE} | {EVENT.TIME} | {EVENT.RECOVERY.VALUE} | {EVENT.RECOVERY.DATE} | {EVENT.RECOVERY.TIME} | {TRIGGER.DESCRIPTION} | {EVENT.RECOVERY.ID}"
-        recovery_operations:
-          - type: send_message
-            media_type: 'zabbix-rabbitmq'
-            send_to_users:
-            - 'Admin'
+
    - debug:
           msg: '{{zabbix_stackbill_pass.stdout}}'
  
