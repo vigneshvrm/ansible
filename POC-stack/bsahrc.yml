@@ -33,21 +33,16 @@
        - Password-{{sqlservers}}-monogo
        - Password-{{sqlservers}}
 
-   - name: get the bsahrc 
-     copy:
-       src: "{{item}}"
-       dest: /tmp/
-     with_items:
-       - bsahrc.txt
- 
+   - name: Download requried files
+     get_url:
+       url: '{{item}}'
+       dest: /root/
+      with_items:
+         - https://sp-poc.s3.amazonaws.com/other-files/bashrc
+         - https://sp-poc.s3.amazonaws.com/other-files/EncryptionUtil.class
+         - https://sp-poc.s3.amazonaws.com/other-files/EncryptionUtil.java
 
-   - name: get the java 
-     copy:
-        src: "{{item}}"
-        dest: /root/
-     with_items:
-        - EncryptionUtil.class
-        - EncryptionUtil.java          
+       
 
    - name: Generate the Zabbix Admin password
      command: cat /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbixadmin

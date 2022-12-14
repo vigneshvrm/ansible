@@ -48,11 +48,17 @@
    - name: Install logstash mongo
      command: /usr/share/logstash/bin/logstash-plugin install --version=3.1.5 logstash-output-mongodb
    
-   - name: copy the Logstash conf file
-     copy:
-       src: logstash.conf
-       dest: /etc/logstash/conf.d/
+  #  - name: copy the Logstash conf file
+  #    copy:
+  #      src: logstash.conf
+  #      dest: /etc/logstash/conf.d/
        
+
+   - name: copy the Logstash conf file
+     get_url:
+       url: https://sp-poc.s3.amazonaws.com/other-files/logstash.conf
+       dest: /etc/logstash/conf.d/
+
 
    - name: Replace the mongo details
      lineinfile:

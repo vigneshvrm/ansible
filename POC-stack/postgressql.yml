@@ -37,11 +37,16 @@
        src: pgdg11.zip
        dest: /tmp/
 
-   - name: copy the postgresql repo
-     copy:
-       src: pgdg11.repo
-       dest: /etc/yum.repos.d/
+  #  - name: copy the postgresql repo
+  #    copy:
+  #      src: pgdg11.repo
+  #      dest: /etc/yum.repos.d/
 
+   - name: Download requried files
+     get_url:
+       url: https://sp-poc.s3.amazonaws.com/other-files/pgdg11.repo
+       dest: /root/
+   
    - name: copy the postgresql repo
      unarchive:      
        src: /tmp/pgdg11.zip
