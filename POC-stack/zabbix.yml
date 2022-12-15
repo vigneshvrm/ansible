@@ -341,7 +341,6 @@
           - '{ALERT.SUBJECT}'
           - '{ALERT.MESSAGE}'
 
-
    - name: Deploy trigger action
      zabbix_action:
         server_url: "http://127.0.0.1/zabbix/"
@@ -410,6 +409,7 @@
        surname: adminstackbill
        usrgrps:
           - Zabbix administrators
+       override_passwd: yes
        passwd: '{{zabbix_stackbill_pass.stdout}}'
        lang: en_GB
        theme: blue-theme
@@ -418,6 +418,7 @@
        refresh: '30'
        rows_per_page: '200'
        after_login_url: ''
+       type: Zabbix super admin
        user_medias:
           - mediatype: zabbix-rabbitmq
             sendto: admin@assistanz.com

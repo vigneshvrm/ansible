@@ -1,23 +1,15 @@
-- hosts: centos
+- hosts: centos2
   become: yes
   become_user: root
   tasks:
-   - name: Disable SELinux
-     selinux:
-       state: disabled
-
-   - name: Replace the mongo details
-     lineinfile:
-       path: /etc/yum.repos.d/CentOS-Base.repo
-       insertafter: '[base]'
-       line: exclude=postgresql*
-
-   - name: Replace the mongo details
-     lineinfile:
-       path: /etc/yum.repos.d/CentOS-Base.repo
-       insertafter: '[updates]'
-       line: exclude=postgresql*
-
-  #  - shell: yum install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm -y
-
-   - shell: yum -y install postgresql11-server -y
+     - name: Update a new zabbix user
+       community.zabbix.zabbix_user:
+           server_url: "http://127.0.0.1/zabbix/"
+           login_user: Admin
+           login_password: 5TBmbwwHLtNKjEdM48mNPA==
+           username: adminstackbill
+           passwd: 5TBmbwwHLtNKjEdM48mNPA==
+           usrgrps:
+             - Zabbix administrators
+             - Zabbix Super Admin	
+           state: present

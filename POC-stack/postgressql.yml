@@ -53,15 +53,18 @@
        dest: /etc/yum.repos.d/
        remote_src: yes
 
-  #  - name: install POSTGRESSQL
-  #    yum: 
-  #      name: 
-  #         - https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-  #         - postgresql11-server
-  #      state: present
+   - name: install POSTGRESSQL
+     yum: 
+       name: https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+       state: present
 
    - name: install POSTGRESSQL
-     command: yum install --disablerepo="*" --enablerepo=OurRepo postgresql11-server -y
+     yum: 
+       name: postgresql11-server
+       state: present
+
+  #  - name: install POSTGRESSQL
+  #    command: yum install --disablerepo="*" --enablerepo=OurRepo postgresql11-server -y
 
    - name: initdb postgresql
      command: /usr/pgsql-11/bin/postgresql-11-setup initdb
