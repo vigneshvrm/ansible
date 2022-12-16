@@ -1,4 +1,4 @@
-- hosts: centos
+- hosts: sbdb
   become: yes
   become_user: root
   tasks:

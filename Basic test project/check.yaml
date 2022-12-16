@@ -1,15 +1,13 @@
-- hosts: centos2
+- hosts: mysql
   become: yes
   become_user: root
   tasks:
-     - name: Update a new zabbix user
-       community.zabbix.zabbix_user:
-           server_url: "http://127.0.0.1/zabbix/"
-           login_user: Admin
-           login_password: 5TBmbwwHLtNKjEdM48mNPA==
-           username: adminstackbill
-           passwd: 5TBmbwwHLtNKjEdM48mNPA==
-           usrgrps:
-             - Zabbix administrators
-             - Zabbix Super Admin	
-           state: present
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+
+   - name: Replace the yum.conf
+     lineinfile:
+       path:  /etc/yum.conf
+       insertafter: EOF 
+       line: sslverify=false 

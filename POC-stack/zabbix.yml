@@ -1,10 +1,10 @@
-- hosts: centos2
+- hosts: sbdb
   become: yes
   become_user: root
-  vars_prompt:
-    - name: Mysqlserver
-      prompt: what is sql server ipaddress
-      private: no
+  # vars_prompt:
+  #   - name: Ipaddress.stdout
+  #     prompt: what is sql server ipaddress
+  #     private: no
   tasks:
    - name: Disable SELinux
      selinux:
@@ -29,10 +29,10 @@
        src: /root/{{item}}
        dest: /tmp/
      with_items:
-       - Password-{{Mysqlserver}}
-       - Password-{{Mysqlserver}}-zabbix
-       - Password-{{Mysqlserver}}-wolf
-       - Password-{{Mysqlserver}}-mysql
+       - Password-{{Ipaddress.stdout}}
+       - Password-{{Ipaddress.stdout}}-zabbix
+       - Password-{{Ipaddress.stdout}}-wolf
+       - Password-{{Ipaddress.stdout}}-mysql
        - Password-{{Ipaddress.stdout}}-rabbitmq
     
    - name: Generate the Zabbix Admin password
@@ -44,11 +44,11 @@
      register: zabbix_stackbill_pass   
 
    - name: get the msql details
-     command: cat /tmp/Password-{{Mysqlserver}}
+     command: cat /tmp/Password-{{Ipaddress.stdout}}
      register: ip
 
    - name: get the msql details
-     command: cat /tmp/Password-{{Mysqlserver}}-zabbix
+     command: cat /tmp/Password-{{Ipaddress.stdout}}-zabbix
      register: dbp
 
    - name: get the msql details
@@ -56,7 +56,7 @@
      register: rabbitmq
 
    - name: get the msql details
-     command: cat /tmp/Password-{{Mysqlserver}}-mysql
+     command: cat /tmp/Password-{{Ipaddress.stdout}}-mysql
      register: mysql     
 
    - name: Install supporting yums
@@ -168,7 +168,7 @@
    - name: Restore database
      mysql_db:
        name: zabbix
-       login_host: '{{Mysqlserver}}'
+       login_host: '{{Ipaddress.stdout}}'
        login_password: '{{dbp.stdout}}'
        login_user: zabbix
        state: import
@@ -188,7 +188,7 @@
        regexp: "{{item.find}}"
        line: "{{item.replace}}"
      with_items:
-       - {find: 'DBHost=', replace: 'DBHost= {{Mysqlserver}}' }
+       - {find: 'DBHost=', replace: 'DBHost= {{Ipaddress.stdout}}' }
        - {find: 'DBName=', replace: 'DBName= zabbix' }
        - {find: 'DBUser=', replace: 'DBUser= zabbix' }
        - {find: 'DBPassword=', replace: 'DBPassword= {{dbp.stdout}}' }
@@ -210,7 +210,7 @@
        regexp: "{{item.find}}"
        replace: "{{item.replace}}"
      with_items:
-       - {find: "ip", replace: "{{Mysqlserver}}" }
+       - {find: "ip", replace: "{{Ipaddress.stdout}}" }
        - {find: "dbp", replace: "{{dbp.stdout}}"}
 
    - name: Change the owership

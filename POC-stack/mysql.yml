@@ -1,4 +1,4 @@
-- hosts: centos
+- hosts: sbdb
   become: yes
   become_user: root
   tasks:
@@ -13,7 +13,10 @@
    - name: Get the server IP address
      command: curl http://checkip.amazonaws.com
      register: pubipaddress
-  
+   
+  #  - name: clean packages
+  #    command: yum update -y  
+
   #  - name: Get the server IP address
   #    shell: hostname -I | awk '{print $1}'
   #    register: hostname
@@ -35,13 +38,28 @@
        state: present
        key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
 
+   - name: Install yum-utils
+     yum:
+       name: yum-utils
+       state: present       
+       
+
    - name: Install MySQL 5.7 repo
-     shell: yum localinstall https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm -y
+     shell: rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm 
+
+
+  #  - name: Install MySQL 5.7 repo
+  #    yum:
+  #      name: https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
+  #      state: present
+
      
    - name: Install MySQL 5.7
-     yum: 
-       name: mysql-community-server
-       state: present
+     shell: yum install mysql-community-server -y
+    #  yum: 
+    #    name: mysql-community-server
+    #    state: present
+
 
    - name: Start the service
      service:

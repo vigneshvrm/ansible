@@ -1,9 +1,11 @@
-- hosts: centos
+- hosts: sbcore
   become: yes
   become_user: root
-  # vars_prompt:
-  #   - name: Mongoserver
-  #     prompt: what is ipaddress
+  vars_prompt:
+    - name: Mongoserver
+      prompt: what is Mongoserver ipaddress
+      private: no
+
   tasks:
    - name: Disable SELinux
      selinux:
@@ -18,8 +20,8 @@
        src: /root/{{item}}
        dest: /tmp/
      with_items:
-       - Password-{{Ipaddress.stdout}}-monogo
-       - Password-{{Ipaddress.stdout}}-mongoIP
+       - Password-{{Mongoserver}}-monogo
+       - Password-{{Mongoserver}}-mongoIP
 
 
   #  - name: get the msql details
@@ -27,11 +29,11 @@
   #    register: ip
      
    - name: get the Mongo details
-     command: cat /tmp/Password-{{Ipaddress.stdout}}-mongoIP
+     command: cat /tmp/Password-{{Mongoserver}}-mongoIP
      register: mongodbIP    
 
    - name: get the Mongo details
-     command: cat /tmp/Password-{{Ipaddress.stdout}}-monogo
+     command: cat /tmp/Password-{{Mongoserver}}-monogo
      register: mongodbpass   
 
    - name: yum install logstash

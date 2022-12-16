@@ -1,4 +1,4 @@
-- hosts: centos
+- hosts: sbcore
   become: yes
   become_user: root
   tasks:

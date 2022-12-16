@@ -1,6 +1,6 @@
 # ansible-galaxy collection install community.rabbitmq
 
-- hosts: centos2
+- hosts: sbdb
   become: yes
   become_user: root
   tasks:

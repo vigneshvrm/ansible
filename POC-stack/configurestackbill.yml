@@ -1,4 +1,4 @@
-- hosts: centos
+- hosts: sbcore
   become: yes
   become_user: root
   tasks:
@@ -71,7 +71,7 @@
    - name: Unarchive startup
      unarchive:
        src: /home/stackbill/startup/startup.tar.gz
-       dest: /home/stackbill/startup/
+       dest: /home/stackbill/
        remote_src: yes
 
    - name: Download stackbill images

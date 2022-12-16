@@ -1,12 +1,22 @@
 # ansible-galaxy collection install community.postgresql
 
-- hosts: centos
+- hosts: sbcore
   become: yes
   become_user: root
   tasks:
    - name: Disable SELinux
      selinux:
        state: disabled
+
+   - name: Replace the yum.conf
+     lineinfile:
+       path:  /etc/yum.conf
+       insertafter: EOF 
+       line: sslverify=false 
+
+   - name: clean packages
+     command: yum clean all
+
 
    - name: Get the server IP address
      command: curl http://checkip.amazonaws.com
@@ -20,9 +30,6 @@
      shell:  cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo
      register: postgr_user_pass      
 
-   - name: clean packages
-     command: yum clean all
-
    - name: install requried POSTGRESSQL
      yum: 
        name: 
@@ -32,33 +39,35 @@
           - python-psycopg2 
        state: present
 
-   - name: copy the postgresql repo
-     copy:
-       src: pgdg11.zip
-       dest: /tmp/
+  #  - name: copy the postgresql repo
+  #    copy:
+  #      src: pgdg11.zip
+  #      dest: /tmp/
 
   #  - name: copy the postgresql repo
   #    copy:
   #      src: pgdg11.repo
   #      dest: /etc/yum.repos.d/
 
-   - name: Download requried files
-     get_url:
-       url: https://sp-poc.s3.amazonaws.com/other-files/pgdg11.repo
-       dest: /etc/yum.repos.d/
+  #  - name: Download requried files
+  #    get_url:
+  #      url: https://sp-poc.s3.amazonaws.com/other-files/pgdg11.repo
+  #      dest: /etc/yum.repos.d/
    
-   - name: copy the postgresql repo
-     unarchive:      
-       src: /tmp/pgdg11.zip
-       dest: /etc/yum.repos.d/
-       remote_src: yes
+  #  - name: copy the postgresql repo
+  #    unarchive:      
+  #      src: /tmp/pgdg11.zip
+  #      dest: /etc/yum.repos.d/
+  #      remote_src: yes
 
    - name: install POSTGRESSQL
+    #  shell: yum install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm -y
      yum: 
        name: https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-       state: present
+       state: installed
 
    - name: install POSTGRESSQL
+    #  yum: postgresql11-server 
      yum: 
        name: postgresql11-server
        state: present
