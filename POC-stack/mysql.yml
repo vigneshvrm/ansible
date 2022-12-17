@@ -42,24 +42,12 @@
      yum:
        name: yum-utils
        state: present       
-       
-
+    
    - name: Install MySQL 5.7 repo
      shell: rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm 
-
-
-  #  - name: Install MySQL 5.7 repo
-  #    yum:
-  #      name: https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
-  #      state: present
-
-     
+    
    - name: Install MySQL 5.7
      shell: yum install mysql-community-server -y
-    #  yum: 
-    #    name: mysql-community-server
-    #    state: present
-
 
    - name: Start the service
      service:
@@ -80,16 +68,6 @@
           mysqladmin -u root
           --password="{{password.stdout}}"
           password "{{mysql_root_pass.stdout}}"
-
-  #  - name: root | set root password  
-  #    mysql_user:
-  #      login_user: root
-  #      login_password: "{{password.stdout}}"
-  #      check_implicit_admin: yes
-  #      name: root
-  #      password: "{{mysql_root_pass.stdout}}"
-  #      priv: "*.*:ALL,GRANT"
-  #      host_all: yes
 
    - name: Create a .my.cnf file
      file:
@@ -123,10 +101,6 @@
        user: ''
        host_all: yes
        state: absent
-    #  command: 'mysql -ne "{{ item }}"'
-    #  with_items:
-    #     - DELETE FROM mysql.user WHERE User=''
-    #  changed_when: False
 
    - name: Disallow root login remotely
      mysql_user:
@@ -135,10 +109,6 @@
       user: root
       host: "'localhost', '127.0.0.1', '::1'"
       state: absent
-    #  command: 'mysql -ne "{{ item }}"'
-    #  with_items:
-    #     - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')
-    #  changed_when: False
 
    - name: Remove test database and access to it
      mysql_db: 
@@ -147,12 +117,6 @@
       db: test
       state: absent
      register: remove_testdb
-
-    #  command: 'mysql -ne "{{ item }}"'
-    #  with_items:
-    #     - DROP DATABASE IF EXISTS test
-    #     - DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'
-    #  changed_when: False
 
    - name: Reload privilege tables
      command: 'mysql -ne "{{ item }}"'
