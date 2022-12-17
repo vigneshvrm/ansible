@@ -8,11 +8,11 @@
      selinux:
        state: disabled
 
-   - name: Replace the yum.conf
-     lineinfile:
-       path:  /etc/yum.conf
-       insertafter: EOF 
-       line: sslverify=false 
+  #  - name: Replace the yum.conf
+  #    lineinfile:
+  #      path:  /etc/yum.conf
+  #      insertafter: EOF 
+  #      line: sslverify=false 
 
    - name: clean packages
      command: yum clean all
@@ -39,41 +39,17 @@
           - python-psycopg2 
        state: present
 
-  #  - name: copy the postgresql repo
-  #    copy:
-  #      src: pgdg11.zip
-  #      dest: /tmp/
-
-  #  - name: copy the postgresql repo
-  #    copy:
-  #      src: pgdg11.repo
-  #      dest: /etc/yum.repos.d/
-
-  #  - name: Download requried files
-  #    get_url:
-  #      url: https://sp-poc.s3.amazonaws.com/other-files/pgdg11.repo
-  #      dest: /etc/yum.repos.d/
-   
-  #  - name: copy the postgresql repo
-  #    unarchive:      
-  #      src: /tmp/pgdg11.zip
-  #      dest: /etc/yum.repos.d/
-  #      remote_src: yes
-
    - name: install POSTGRESSQL
-    #  shell: yum install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm -y
      yum: 
        name: https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
        state: installed
+       validate_certs: false
 
    - name: install POSTGRESSQL
-    #  yum: postgresql11-server 
      yum: 
        name: postgresql11-server
        state: present
 
-  #  - name: install POSTGRESSQL
-  #    command: yum install --disablerepo="*" --enablerepo=OurRepo postgresql11-server -y
 
    - name: initdb postgresql
      command: /usr/pgsql-11/bin/postgresql-11-setup initdb

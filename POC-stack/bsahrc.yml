@@ -1,8 +1,8 @@
-- hosts: sbdb
+- hosts: sbcore
   become: yes
   become_user: root
   vars_prompt:
-    # - name: Ipaddress.stdout
+    # - name: Zabbix
     #   prompt: what is mysql Private ipaddress
     #   private: no
     - name: Domainname
@@ -16,7 +16,10 @@
       private: no       
     - name: CLOUDSTACK_SECRET_KEY
       prompt: what is CLOUDSTACK_SECRET_KEY
-      private: no             
+      private: no   
+    - name: Zabbix
+      prompt: what is zabbix server IP
+      private: no                
   tasks:
 
    - name: Install supporting Packages
@@ -35,12 +38,15 @@
    - name: get the msql details
      copy:
        src: /root/{{item}}
-       dest: /tmp/
+       dest: /root/
      with_items:
-       - Password-{{Ipaddress.stdout}}-zabbix
-       - Password-{{Ipaddress.stdout}}-wolf
-       - Password-{{Ipaddress.stdout}}-monogo
-       - Password-{{Ipaddress.stdout}}
+       - Password-{{Zabbix}}-zabbix
+       - Password-{{Zabbix}}-wolf
+       - Password-{{Zabbix}}-monogo
+       - Password-{{Zabbix}}
+       - Password-{{Zabbix}}-zabbixadmin
+       - Password-{{Zabbix}}-rabbitmq
+       - Password-{{Zabbix}}-zabbix_stackbill_pass
 
    - name: Download requried files
      get_url:
@@ -54,27 +60,27 @@
        
 
    - name: Get the Zabbix Admin password
-     command: cat /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbixadmin
+     command: cat /root/Password-{{Zabbix}}-zabbixadmin
      register: zabbix_Admin_pass       
 
    - name: Get the password monogo details
-     command: cat /tmp/Password-{{Ipaddress.stdout}}-monogo
+     command: cat /root/Password-{{Zabbix}}-monogo
      register: monogo
 
    - name: Get the password zabbix details
-     command: cat /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-rabbitmq
+     command: cat /root/Password-{{Zabbix}}-rabbitmq
      register: rabbitpass
 
    - name: Get the password zabbix details
-     command: cat /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbix_stackbill_pass
+     command: cat /root/Password-{{Zabbix}}-zabbix_stackbill_pass
      register: zabbix_stackbill_pass
 
    - name: Get the password wolf details
-     command: cat /tmp/Password-{{Ipaddress.stdout}}-wolf
+     command: cat /root/Password-{{Zabbix}}-wolf
      register: wolf
 
    - name: Get the password zabbix details
-     command: cat /tmp/Password-{{Ipaddress.stdout}}-zabbix
+     command: cat /root/Password-{{Zabbix}}-zabbix
      register: zabbix
 
    - name: Encrypted password
@@ -82,7 +88,7 @@
      register: Encrypted_stack_bill     
 
    - name: Get the Ip address
-     command: cat /tmp/Password-{{Ipaddress.stdout}}
+     command: cat /tmp/Password-{{Zabbix}}
      register: ip
 
    - name: Replace the credentails
@@ -94,36 +100,36 @@
        - {find: 'wolfpass', replace: '{{wolf.stdout}}' }
        - {find: 'wolfmonpass', replace: '{{monogo.stdout}}' }
        - {find: 'rabbitpass', replace: '{{rabbitpass.stdout}}' }
-       - {find: '10.61.61.2', replace: '{{Ipaddress.stdout}}' }
+       - {find: '10.61.61.2', replace: '{{Zabbix}}' }
        - {find: 'my.domain.com', replace: '{{Domainname}}' }  
-       - {find: '185.95.215.18', replace: '{{pubipaddress.stdout}}' }     
+       - {find: '185.95.215.18', replace: '{{pubZabbix}}' }     
        - {find: '10.30.11.7850', replace: '{{cloudstack}}' }
-       - {find: 'rabbitip', replace: '{{Ipaddress.stdout}}' }
-       - {find: 'WOLF_MONGO_HOST=localhost', replace: 'WOLF_MONGO_HOST={{Ipaddress.stdout}}' }
-       - {find: 'WOLF_DB_HOST=localhost', replace: 'WOLF_DB_HOST={{Ipaddress.stdout}}' }
+       - {find: 'rabbitip', replace: '{{Zabbix}}' }
+       - {find: 'WOLF_MONGO_HOST=localhost', replace: 'WOLF_MONGO_HOST={{Zabbix}}' }
+       - {find: 'WOLF_DB_HOST=localhost', replace: 'WOLF_DB_HOST={{Zabbix}}' }
        - {find: 'ab22996b80e4fb373de9ec995ac5f3ed', replace: '{{Encrypted_stack_bill.stdout}}' }
        - {find: '05_th75goxacex1Fc1J8l9AHXTCfxdHsTrxd4WIfMD4JN6w4p08EiEuFR9yP1C6WZVxsXocBqVDpfIPTQ9MD9w', replace: '{{CLOUDSTACK_API_KEY}}' }
        - {find: '7Ljo6zdTpWiQrl68dSjQWEIZuUPLuC5rRvek7wkjCfCgApDKcJ8W7LsbBL2GhurRuwv1YsIPYNRsD1d0ciHMGg', replace: '{{CLOUDSTACK_SECRET_KEY}}' }       
 
 
    - name: copy the content to bashrc    
-     shell: cat /root/bsahrc.txt >> /root/.bashrc
+     shell: cat /root/bsahrc.txt >> /home/stackbill/.bashrc
 
    - name: Password file
-     shell: echo "{{Encrypted_stack_bill.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-Encrypted_stack_bill     
+     shell: echo "{{Encrypted_stack_bill.stdout}}"  >> /root/Password-{{Zabbix}}/Password-{{Zabbix}}-Encrypted_stack_bill     
 
    - name: Password file
-     shell: echo "{{Domainname}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-Domainname     
+     shell: echo "{{Domainname}}"  >> /root/Password-{{Zabbix}}/Password-{{Zabbix}}-Domainname     
 
    - name: Password file
-     shell: echo "{{cloudstack}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-cloudstackip 
+     shell: echo "{{cloudstack}}"  >> /root/Password-{{Zabbix}}/Password-{{Zabbix}}-cloudstackip 
 
    - name: Copy password file
      fetch:
-        src: /root/Password-{{Ipaddress.stdout}}/{{item}}
+        src: /root/Password-{{Zabbix}}/{{item}}
         dest: /root/
         flat: yes
      with_items:
-       - Password-{{Ipaddress.stdout}}-Encrypted_stack_bill 
-       - Password-{{Ipaddress.stdout}}-Domainname
-       - Password-{{Ipaddress.stdout}}-cloudstackip 
+       - Password-{{Zabbix}}-Encrypted_stack_bill 
+       - Password-{{Zabbix}}-Domainname
+       - Password-{{Zabbix}}-cloudstackip 

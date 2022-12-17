@@ -8,7 +8,6 @@
       - name: Ipaddress
         prompt: what is zabbix ip address
         private: no  
-       
   tasks:
    - name: Disable SELinux
      selinux:
@@ -33,20 +32,15 @@
        url: https://sp-poc.s3.amazonaws.com/nginx.conf
        dest: /etc/nginx/conf.d/stackbill.conf
 
-    - name: Replace the nginx conf
+   - name: Replace the nginx conf
      replace:
-       path: /etc/nginx/conf.d/stackbill.conf
-       regexp: "{{item.find}}"
-       replace: "{{item.replace}}"
+        path: /etc/nginx/conf.d/stackbill.conf
+        regexp: "{{item.find}}"
+        replace: "{{item.replace}}"
      with_items:       
-       - {find: 'app.thecloud.id', replace: '{{Domainname}}' }
-       - {find: '10.98.99.12', replace: '{{Ipaddress}}' }
-      #  - {find: 'rabbitpass', replace: '{{rabbitpass.stdout}}' }
-      #  - {find: '10.61.61.2', replace: '{{Ipaddress.stdout}}' }
-      #  - {find: 'my.domain.com', replace: '{{Domainname}}' }  
-      #  - {find: '185.95.215.18', replace: '{{pubipaddress.stdout}}' }     
-      #  - {find: '10.30.11.7850', replace: '{{cloudstack}}' }
-      #  - {find: 'rabbitip', replace: '{{Ipaddress.stdout}}' }      
+        - {find: 'app.thecloud.id', replace: '{{Domainname}}' }
+        - {find: '10.98.99.12', replace: '{{Ipaddress}}' }
+  
 
 
    - name: Restart nginx
