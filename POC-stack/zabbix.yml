@@ -76,9 +76,7 @@
          - zip
          - MySQL-python
        state: present
-
-    
-    
+   
    - name: start the apache service
      service:
         name: httpd
@@ -193,11 +191,6 @@
        - {find: 'DBUser=', replace: 'DBUser= zabbix' }
        - {find: 'DBPassword=', replace: 'DBPassword= {{dbp.stdout}}' }
 
-  #  - name: create a copy of the zabbix.conf.php
-  #    copy:
-  #      src: zabbix.conf.php
-  #      dest: /etc/zabbix/web/
-
    - name: Download requried files
      get_url:
        url: https://sp-poc.s3.amazonaws.com/other-files/zabbix.conf.php
@@ -237,7 +230,7 @@
        path: /root/zabbixfiles
        state: directory
 
-   - name: Download zabbix Rpms
+   - name: Download zabbix files
      get_url:
        url: "{{ item }}"
        dest: /root/zabbixfiles
@@ -280,7 +273,6 @@
      copy:
        src: /root/zabbixfiles/.graph-key
        dest: /usr/share/zabbix/
-      
        remote_src: yes
 
    - name: Replace the rabbitmq
@@ -300,11 +292,6 @@
        name: zabbix-server
        state: restarted
        enabled: yes
-
-  #  - name: Copy the  Zabbix web conf file 
-  #    copy:
-  #       src: zbx_export_templates.xml
-  #       dest: /root/
 
    - name: Download template
      get_url:

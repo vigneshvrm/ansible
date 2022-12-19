@@ -53,7 +53,7 @@
         state: directory
 
    - name: Password file
-     shell: echo "{{rabbitmq.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-rabbitmq
+     shell: echo "{{rabbitmq.stdout}}"  > /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-rabbitmq
 
    - name: Copy password file
      fetch:

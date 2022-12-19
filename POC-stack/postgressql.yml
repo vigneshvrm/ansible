@@ -50,7 +50,6 @@
        name: postgresql11-server
        state: present
 
-
    - name: initdb postgresql
      command: /usr/pgsql-11/bin/postgresql-11-setup initdb
 
@@ -95,7 +94,7 @@
        state: directory
 
    - name: Password file
-     shell: echo "{{postgr_user_pass.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-postgr
+     shell: echo "{{postgr_user_pass.stdout}}"  > /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-postgr
 
    - name: Copy password file
      fetch:

@@ -24,7 +24,9 @@
 
    - name: Install supporting Packages
      package:
-       name: java-11-openjdk-devel
+       name: 
+        - java-11-openjdk-devel
+        - dos2unix
        state: present 
 
    - name: Get the server IP address
@@ -107,7 +109,7 @@
        - {find: 'rabbitpass', replace: '{{rabbitpass.stdout}}' }
        - {find: '10.61.61.2', replace: '{{Zabbix}}' }
        - {find: 'my.domain.com', replace: '{{Domainname}}' }  
-       - {find: '185.95.215.18', replace: '{{publicipZabbix}}' }     
+       - {find: '185.95.215.18', replace: '{{publicipZabbix.stdout}}' }     
        - {find: '10.30.11.7850', replace: '{{cloudstack}}' }
        - {find: 'rabbitip', replace: '{{Zabbix}}' }
        - {find: 'WOLF_MONGO_HOST=localhost', replace: 'WOLF_MONGO_HOST={{Zabbix}}' }
@@ -120,14 +122,34 @@
    - name: copy the content to bashrc    
      shell: cat /root/bsahrc.txt >> /home/stackbill/.bashrc
 
-   - name: Password file
-     shell: echo "{{Encrypted_stack_bill.stdout}}"  >> /root/Password-{{Zabbix}}/Password-{{Zabbix}}-Encrypted_stack_bill     
+   - name: Update bashrc    
+     shell: dos2unix  /home/stackbill/.bashrc
+
+   - name: Reload bashrc    
+     shell: source  /home/stackbill/.bashrc
+
+   - name: Reload the service
+     service:
+       name: '{{item}}'
+       state: restarted
+       enabled: yes     
+     with_items:
+       - stackbill.service
+       - billing
+       - monitoring 
+       - notification 
+       - mailservice 
+       - stackbill-util 
+
 
    - name: Password file
-     shell: echo "{{Domainname}}"  >> /root/Password-{{Zabbix}}/Password-{{Zabbix}}-Domainname     
+     shell: echo "{{Encrypted_stack_bill.stdout}}"  > /root/Password-{{Zabbix}}/Password-{{Zabbix}}-Encrypted_stack_bill     
 
    - name: Password file
-     shell: echo "{{cloudstack}}"  >> /root/Password-{{Zabbix}}/Password-{{Zabbix}}-cloudstackip 
+     shell: echo "{{Domainname}}"  > /root/Password-{{Zabbix}}/Password-{{Zabbix}}-Domainname     
+
+   - name: Password file
+     shell: echo "{{cloudstack}}"  > /root/Password-{{Zabbix}}/Password-{{Zabbix}}-cloudstackip 
 
    - name: Copy password file
      fetch:

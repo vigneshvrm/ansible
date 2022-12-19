@@ -14,13 +14,6 @@
      command: curl http://checkip.amazonaws.com
      register: pubipaddress
    
-  #  - name: clean packages
-  #    command: yum update -y  
-
-  #  - name: Get the server IP address
-  #    shell: hostname -I | awk '{print $1}'
-  #    register: hostname
- 
    - name: Generate the Mysql user password
      shell:  gpg --gen-random --armor 1 20
      register: mysql1_user_pass
@@ -129,8 +122,8 @@
      command: 'mysql -ne "{{ item }}"'
      with_items:
          - CREATE SCHEMA `wolf` DEFAULT CHARACTER SET utf8;
-         - CREATE USER 'stackbill'@'localhost' IDENTIFIED BY '{{mysql_user_pass.stdout}}';
-         - GRANT ALL PRIVILEGES ON wolf.* TO 'stackbill'@'localhost';
+         - CREATE USER 'stackbill'@'%' IDENTIFIED BY '{{mysql_user_pass.stdout}}';
+         - GRANT ALL PRIVILEGES ON wolf.* TO 'stackbill'@'%';
          - FLUSH PRIVILEGES;
      changed_when: False
 
@@ -194,19 +187,19 @@
        state: directory
 
    - name: Password file
-     shell: echo "{{mysql_root_pass.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-mysql
+     shell: echo "{{mysql_root_pass.stdout}}"  > /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-mysql
    
    - name: Password file
-     shell: echo "{{mysql_user_pass.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-wolf
+     shell: echo "{{mysql_user_pass.stdout}}"  > /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-wolf
 
    - name: Password file
-     shell: echo "{{mysql1_user_pass.stdout}}" >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbix
+     shell: echo "{{mysql1_user_pass.stdout}}" > /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbix
    
    - name: Password file
-     shell: echo "{{Ipaddress.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}
+     shell: echo "{{Ipaddress.stdout}}"  > /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}
 
    - name: Password file
-     shell: echo "{{pubipaddress.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-public
+     shell: echo "{{pubipaddress.stdout}}"  > /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-public
    
    - name: Copy password file
      fetch:

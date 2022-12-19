@@ -63,10 +63,10 @@
        state: directory
 
    - name: Password file
-     shell: echo "{{monogo_user_pass.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-monogo
+     shell: echo "{{monogo_user_pass.stdout}}"  > /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-monogo
 
    - name: Password file
-     shell: echo "{{Ipaddress.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-mongoIP
+     shell: echo "{{Ipaddress.stdout}}"  > /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-mongoIP
 
    - name: Copy password file
      fetch:
