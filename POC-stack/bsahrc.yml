@@ -47,6 +47,7 @@
        - Password-{{Zabbix}}-zabbixadmin
        - Password-{{Zabbix}}-rabbitmq
        - Password-{{Zabbix}}-zabbix_stackbill_pass
+       - Password-{{Zabbix}}-publicipZabbix
 
    - name: Download requried files
      get_url:
@@ -91,6 +92,10 @@
      command: cat /tmp/Password-{{Zabbix}}
      register: ip
 
+   - name: Get the Zabbix Admin password
+     command: cat /root/Password-{{Zabbix}}-publicipZabbix
+     register: publicipZabbix      
+
    - name: Replace the credentails
      replace:
        path: /root/bsahrc.txt
@@ -102,7 +107,7 @@
        - {find: 'rabbitpass', replace: '{{rabbitpass.stdout}}' }
        - {find: '10.61.61.2', replace: '{{Zabbix}}' }
        - {find: 'my.domain.com', replace: '{{Domainname}}' }  
-       - {find: '185.95.215.18', replace: '{{pubZabbix}}' }     
+       - {find: '185.95.215.18', replace: '{{publicipZabbix}}' }     
        - {find: '10.30.11.7850', replace: '{{cloudstack}}' }
        - {find: 'rabbitip', replace: '{{Zabbix}}' }
        - {find: 'WOLF_MONGO_HOST=localhost', replace: 'WOLF_MONGO_HOST={{Zabbix}}' }
