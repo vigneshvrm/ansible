@@ -125,6 +125,12 @@
    - name: Update bashrc    
      shell: dos2unix  /home/stackbill/.bashrc
 
+
+   - name: Remove dos2unix Packages
+     package:
+       name: dos2unix
+       state: absent 
+
    - name: Reload bashrc    
      shell: source  /home/stackbill/.bashrc
 
