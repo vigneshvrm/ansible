@@ -11,6 +11,10 @@
        name: firewalld
        state: stopped
        enabled: False
+
+   - name: Add stackbi become_user
+     user:
+       name: stackbill       
      
    - name: Install supporting Packages
      package:

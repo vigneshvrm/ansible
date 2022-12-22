@@ -1,6 +1,4 @@
 - hosts: win
-  # become: yes
-  # become_user: root
   vars_prompt:
     - name: ipadd
       prompt: what is source ipaddress
