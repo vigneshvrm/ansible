@@ -29,6 +29,10 @@
         - dos2unix
        state: present 
 
+   - name: Add stackbi become_user
+     user:
+       name: stackbill       
+
    - name: Get the server IP address
      command: curl http://checkip.amazonaws.com
      register: pubipaddress   
@@ -91,7 +95,7 @@
      register: Encrypted_stack_bill     
 
    - name: Get the Ip address
-     command: cat /tmp/Password-{{Zabbix}}
+     command: cat /root/Password-{{Zabbix}}
      register: ip
 
    - name: Get the Zabbix Admin password

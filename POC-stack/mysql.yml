@@ -179,7 +179,9 @@
        line: 'max_connections = 1000'
   
    - name: restart mysql
-     service: name=mysqld state=restarted
+     service: 
+       name: mysqld 
+       state: restarted
 
    - name: Create a directory
      file:

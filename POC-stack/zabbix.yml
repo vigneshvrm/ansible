@@ -384,7 +384,7 @@
               high: yes
               disaster: yes
             active: yes
-        state: absent
+        state: present
 
    - name: create a new zabbix user.
      community.zabbix.zabbix_user:
