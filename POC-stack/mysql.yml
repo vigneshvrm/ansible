@@ -136,6 +136,7 @@
          - FLUSH PRIVILEGES;
      changed_when: False
 
+
    - name: 'Add sql_modein my.cnf'
      lineinfile:
        path: /etc/my.cnf

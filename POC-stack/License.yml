@@ -1,0 +1,18 @@
+- hosts: sbdb
+  become: yes
+  become_user: root
+  tasks:
+   - name: Disable SELinux
+     selinux:
+       state: disabled
+       
+   - name: License Key Updation
+     community.mysql.mysql_query:  
+        login_db: wolf
+        query: 
+           - truncate table wolf.expire_validity;
+           - INSERT INTO `wolf`.`expire_validity` (`id`, `type`, `valid_key`) VALUES ( '1' , 'INT' , 'O66x4vprc9lz+5nrmXOZW4CWq1WVVadHTIstHm1OCZE=');  
+           - update wolf.expire_validity set valid_key=null where id=1
+           - update wolf.env_configurations set value='' where keyname='app.request.folder';
+        single_transaction: yes
+     changed_when: False   
