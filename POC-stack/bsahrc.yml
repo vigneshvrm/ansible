@@ -52,7 +52,7 @@
        - Password-{{Zabbix}}
        - Password-{{Zabbix}}-zabbixadmin
        - Password-{{Zabbix}}-rabbitmq
-       - Password-{{Zabbix}}-zabbix_stackbill_pass
+       - Password-{{Zabbix}}-zabbix_Admin_pass
        - Password-{{Zabbix}}-publicipZabbix
 
    - name: Download requried files
@@ -79,7 +79,7 @@
      register: rabbitpass
 
    - name: Get the password zabbix details
-     command: cat /root/Password-{{Zabbix}}-zabbix_stackbill_pass
+     command: cat /root/Password-{{Zabbix}}-zabbix_Admin_pass
      register: zabbix_stackbill_pass
 
    - name: Get the password wolf details
@@ -153,7 +153,7 @@
 
 
    - name: Password file
-     shell: echo "{{Encrypted_stack_bill.stdout}}"  > /root/Password-{{Zabbix}}-Encrypted_stack_bill     
+     shell: echo "{{Encrypted_stack_bill.stdout}}"  > /root/Password-{{Zabbix}}-Encrypted_Admin_bill     
 
    - name: Password file
      shell: echo "{{Domainname}}"  > /root/Password-{{Zabbix}}-Domainname     
