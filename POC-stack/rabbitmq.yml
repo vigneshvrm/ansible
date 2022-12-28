@@ -16,7 +16,7 @@
      shell: cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 12 ; echo
      register: rabbitmq
 
-   - name: Install Zabbix Packages
+   - name: Install rabbitmq Packages
      yum:
        name:
          - https://packages.erlang-solutions.com/erlang/rpm/centos/7/x86_64/esl-erlang_24.0.2-1~centos~7_amd64.rpm

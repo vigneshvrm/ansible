@@ -12,6 +12,16 @@
        state: stopped
        enabled: False
 
+   - name: Set timezone to Asia/Kolkata
+     timezone:
+       name: Asia/Kolkata
+
+   - name: Set a hostname
+     hostname:
+        name: stackbill-app
+        use: systemd
+    
+
    - name: Add stackbi become_user
      user:
        name: stackbill       
@@ -52,6 +62,17 @@
        src: /opt/jdk-8u221-linux-x64.tar.gz
        dest: /opt/
        remote_src: yes
+
+   - name: Update Java.sh
+     blockinfile:
+       path: /etc/profile.d/java.sh
+       block: |
+          #!/bin/bash
+          JAVA_HOME=/opt/jdk1.8.0_221/
+          PATH=$JAVA_HOME/bin:$PATH
+          export PATH JAVA_HOME
+          export CLASSPATH=.
+
 
    - name: Execute the java script
      command: sh /etc/profile.d/java.sh

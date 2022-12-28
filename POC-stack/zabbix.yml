@@ -225,6 +225,7 @@
    - name: install zabbix api
      pip:
       name: zabbix-api 
+
    - name: Create a directory
      file:
        path: /root/zabbixfiles
@@ -358,7 +359,7 @@
         server_url: "http://127.0.0.1/zabbix/"
         login_user: Admin
         login_password: zabbix
-        username: Admin
+        alias : adminstackbill
         name: Admin
         surname: Admin
         usrgrps:
@@ -386,39 +387,39 @@
             active: yes
         state: present
 
-   - name: create a new zabbix user.
-     community.zabbix.zabbix_user:
-       server_url: "http://127.0.0.1/zabbix/"
-       login_user: Admin
-       login_password: '{{zabbix_Admin_pass.stdout}}'
-       username: adminstackbill
-       name: adminstackbill
-       surname: adminstackbill
-       usrgrps:
-          - Zabbix administrators
-       override_passwd: yes
-       passwd: '{{zabbix_stackbill_pass.stdout}}'
-       lang: en_GB
-       theme: blue-theme
-       autologin: no
-       autologout: '0'
-       refresh: '30'
-       rows_per_page: '200'
-       after_login_url: ''
-       type: Zabbix super admin
-       user_medias:
-          - mediatype: zabbix-rabbitmq
-            sendto: admin@assistanz.com
-            period: 1-7,00:00-24:00
-            severity:
-              not_classified: yes
-              information: yes
-              warning: yes
-              average: yes
-              high: yes
-              disaster: yes
-            active: yes
-       state: present      
+  #  - name: create a new zabbix user.
+  #    community.zabbix.zabbix_user:
+  #      server_url: "http://127.0.0.1/zabbix/"
+  #      login_user: Admin
+  #      login_password: '{{zabbix_Admin_pass.stdout}}'
+  #      username: adminstackbill
+  #      name: adminstackbill
+  #      surname: adminstackbill
+  #      usrgrps:
+  #         - Zabbix administrators
+  #      override_passwd: yes
+  #      passwd: '{{zabbix_stackbill_pass.stdout}}'
+  #      lang: en_GB
+  #      theme: blue-theme
+  #      autologin: no
+  #      autologout: '0'
+  #      refresh: '30'
+  #      rows_per_page: '200'
+  #      after_login_url: ''
+  #      type: Zabbix super admin
+  #      user_medias:
+  #         - mediatype: zabbix-rabbitmq
+  #           sendto: admin@assistanz.com
+  #           period: 1-7,00:00-24:00
+  #           severity:
+  #             not_classified: yes
+  #             information: yes
+  #             warning: yes
+  #             average: yes
+  #             high: yes
+  #             disaster: yes
+  #           active: yes
+  #      state: present      
 
    - debug:
        msg: '{{zabbix_Admin_pass.stdout}}'
@@ -437,8 +438,8 @@
    - name: Password file
      shell: echo "{{Ipaddress.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-pvtipZabbix
 
-   - name: Password file
-     shell: echo "{{pubipaddress.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbixadmin
+  #  - name: Password file
+  #    shell: echo "{{pubipaddress.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-zabbixadmin
                   
    - name: Password file
      shell: echo "{{pubipaddress.stdout}}"  >> /root/Password-{{Ipaddress.stdout}}/Password-{{Ipaddress.stdout}}-publicipZabbix
@@ -456,7 +457,7 @@
         flat: yes
      with_items:
        - Password-{{Ipaddress.stdout}}-pvtipZabbix
-       - Password-{{Ipaddress.stdout}}-zabbixadmin
+      #  - Password-{{Ipaddress.stdout}}-zabbixadmin
        - Password-{{Ipaddress.stdout}}-publicipZabbix
        - Password-{{Ipaddress.stdout}}-zabbix_stackbill_pass
        - Password-{{Ipaddress.stdout}}-zabbix_Admin_pass

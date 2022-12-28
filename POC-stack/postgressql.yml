@@ -30,6 +30,10 @@
      shell:  cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo
      register: postgr_user_pass      
 
+   - name: Generate the postgr  password
+     shell:  cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo
+     register: postgr_pass      
+
    - name: install requried POSTGRESSQL
      yum: 
        name: 
@@ -87,6 +91,8 @@
         role: kong
         type: database
         priv: ALL
+        
+# sudo -u postgres psql -d template1 -c "ALTER USER postgres WITH PASSWORD '<Random Password>';" 
 
    - name: Create a directory
      file:

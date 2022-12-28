@@ -6,9 +6,9 @@
      selinux:
        state: disabled
 
-  #  - name: Add stackbi become_user
-  #    user:
-  #      name: stackbill
+   - name: Add stackbi become_user
+     user:
+       name: stackbill
 
    - name: Create a directory
      file:
@@ -97,7 +97,7 @@
        - "/home/stackbill/"
        - "/var/log/stackbill"
 
-   - name: Download stackbill images
+   - name: Download JAVA JAR file
      get_url:
        url: "{{ item }}"
        dest: /tmp/
