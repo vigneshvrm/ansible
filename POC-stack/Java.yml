@@ -63,17 +63,6 @@
        dest: /opt/
        remote_src: yes
 
-   - name: Update Java.sh
-     blockinfile:
-       path: /etc/profile.d/java.sh
-       block: |
-          #!/bin/bash
-          JAVA_HOME=/opt/jdk1.8.0_221/
-          PATH=$JAVA_HOME/bin:$PATH
-          export PATH JAVA_HOME
-          export CLASSPATH=.
-
-
    - name: Execute the java script
      command: sh /etc/profile.d/java.sh
 
