@@ -13,7 +13,6 @@
     - name: passwd
       prompt: what is password
       private: no      
-
   tasks:
     - name: Add a host
       add_host:
@@ -24,10 +23,9 @@
         ansible_password: "{{passwd}}"
         ansible_winrm_server_cert_validation: ignore
         groups: serverlist
-- hosts: serverlist
+- name: The tasks is executing
+  hosts: serverlist
   tasks:
-
-
     - name: Copy a single file
       win_get_url:
        url: https://cdn.zabbix.com/zabbix/binaries/stable/3.0/3.0.32/zabbix_agent-3.0.32-windows-amd64-openssl.msi
