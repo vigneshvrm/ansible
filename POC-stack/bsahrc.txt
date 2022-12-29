@@ -10,6 +10,7 @@ export WOLF_MONGO_USERNAME=stackbill
 export WOLF_MONGO_PASSWORD=wolfmonpass
 export WOLF_MONGO_PORT=27017
 
+
 #LOG
 export LOG_PATH=/var/log/stackbill/
 export WOLF_TOMCAT_BASE=/home/stackbill/tomcatbase/
