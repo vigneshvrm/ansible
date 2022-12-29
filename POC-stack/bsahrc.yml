@@ -50,7 +50,7 @@
        - Password-{{Zabbix}}-wolf
        - Password-{{Zabbix}}-monogo
        - Password-{{Zabbix}}
-       - Password-{{Zabbix}}-zabbixadmin
+      #  - Password-{{Zabbix}}-zabbixadmin
        - Password-{{Zabbix}}-rabbitmq
        - Password-{{Zabbix}}-zabbix_Admin_pass
        - Password-{{Zabbix}}-publicipZabbix
@@ -66,9 +66,9 @@
 
        
 
-   - name: Get the Zabbix Admin password
-     command: cat /root/Password-{{Zabbix}}-zabbixadmin
-     register: zabbix_Admin_pass       
+  #  - name: Get the Zabbix Admin password
+  #    command: cat /root/Password-{{Zabbix}}-zabbixadmin
+  #    register: zabbix_Admin_pass       
 
    - name: Get the password monogo details
      command: cat /root/Password-{{Zabbix}}-monogo
@@ -154,7 +154,7 @@
 
 
    - name: Password file
-     shell: echo "{{Encrypted_stack_bill.stdout}}"  > /root/Password-{{Zabbix}}-Encrypted_Admin_bill     
+     shell: echo "{{Encrypted_stack_bill.stdout}}"  > /root/Password-{{Zabbix}}-Encrypted-Admin-bill     
 
    - name: Password file
      shell: echo "{{Domainname}}"  > /root/Password-{{Zabbix}}-Domainname     
@@ -168,6 +168,6 @@
         dest: /root/
         flat: yes
      with_items:
-       - Password-{{Zabbix}}-Encrypted_stack_bill 
+       - Password-{{Zabbix}}-Encrypted-Admin-bill 
        - Password-{{Zabbix}}-Domainname
        - Password-{{Zabbix}}-cloudstackip 

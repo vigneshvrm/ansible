@@ -102,22 +102,20 @@
        url: "{{ item }}"
        dest: /tmp/
      with_items:       
-       - https://sp-poc.s3.amazonaws.com/buildfiles/stable_build.tar.gz
-       - https://sp-poc.s3.amazonaws.com/buildfiles/admin.tar.gz
-       - https://sp-poc.s3.amazonaws.com/buildfiles/download-agents.tar.gz
-       - https://sp-poc.s3.amazonaws.com/buildfiles/user.tar.gz
+       - https://sp-poc.s3.amazonaws.com/buildfiles/html.tar.gz
 
 
    - name: Unarchive startup
      unarchive:
-       src: /tmp/{{item}}
-       dest: /var/www/html/
+       src: /tmp/html.tar.gz
+       dest: /var/www/
        remote_src: yes
-     with_items:       
-       - "stable_build.tar.gz"
-       - "admin.tar.gz"
-       - "download-agents.tar.gz"
-       - "user.tar.gz"
+       keep_newer: true
+    #  with_items:       
+    #    - "stable_build.tar.gz"
+    #    - "admin.tar.gz"
+    #    - "download-agents.tar.gz"
+    #    - "user.tar.gz"
 
    - name: Start the service
      service:
