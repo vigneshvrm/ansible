@@ -373,6 +373,7 @@
         refresh: '30'
         rows_per_page: '200'
         after_login_url: ''
+        type: Zabbix super admin
         user_medias:
           - mediatype: zabbix-rabbitmq
             sendto: admin@assistanz.com

@@ -121,6 +121,7 @@
        - {find: 'ab22996b80e4fb373de9ec995ac5f3ed', replace: '{{Encrypted_stack_bill.stdout}}' }
        - {find: '05_th75goxacex1Fc1J8l9AHXTCfxdHsTrxd4WIfMD4JN6w4p08EiEuFR9yP1C6WZVxsXocBqVDpfIPTQ9MD9w', replace: '{{CLOUDSTACK_API_KEY}}' }
        - {find: '7Ljo6zdTpWiQrl68dSjQWEIZuUPLuC5rRvek7wkjCfCgApDKcJ8W7LsbBL2GhurRuwv1YsIPYNRsD1d0ciHMGg', replace: '{{CLOUDSTACK_SECRET_KEY}}' }       
+       - {find: 'http://demo.stackbill.com', replace: '{{Domainname}}' }
 
 
    - name: copy the content to bashrc    

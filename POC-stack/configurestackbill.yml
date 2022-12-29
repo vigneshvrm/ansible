@@ -119,15 +119,15 @@
        - "download-agents.tar.gz"
        - "user.tar.gz"
 
-  #  - name: Start the service
-  #    service:
-  #      name: '{{item}}'
-  #      state: started
-  #      enabled: yes     
-  #    with_items:
-  #      - stackbill.service
-  #      - billing
-  #      - monitoring 
-  #      - notification 
-  #      - mailservice 
-  #      - stackbill-util 
+   - name: Start the service
+     service:
+       name: '{{item}}'
+       state: started
+       enabled: yes     
+     with_items:
+       - stackbill
+       - billing
+       - monitoring 
+       - notification 
+       - mailservice 
+       - stackbill-util 
