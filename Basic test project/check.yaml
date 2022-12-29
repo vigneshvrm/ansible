@@ -1,20 +1,42 @@
-- hosts: win
-  # become: yes
-  # become_user: root
+
+
+- name : This is first play
+  hosts: localhost
+  gather_facts: no
   vars_prompt:
-    - name: ipadd
+    - name: hostname
       prompt: what is source ipaddress
       private: no
-  tasks:   
+    - name: user
+      prompt: what is user name
+      private: no
+    - name: passwd
+      prompt: what is password
+      private: no      
+
+  tasks:
+    - name: Add a host
+      add_host:
+        name: "{{hostname}}"
+        hostname: "{{hostname}}"
+        ansible_user: "{{user}}"
+        ansible_connection: winrm
+        ansible_password: "{{passwd}}"
+        ansible_winrm_server_cert_validation: ignore
+        groups: serverlist
+- hosts: serverlist
+  tasks:
+
+
     - name: Copy a single file
       win_get_url:
-        url: https://cdn.zabbix.com/zabbix/binaries/stable/3.0/3.0.32/zabbix_agent-3.0.32-windows-amd64-openssl.msi
-        dest: C:\Temp\
-        checksum: 4d7158195db823f536ecb481e5ba6bb6db040a4b
-        checksum_algorithm: sha1
-        force: yes
+       url: https://cdn.zabbix.com/zabbix/binaries/stable/3.0/3.0.32/zabbix_agent-3.0.32-windows-amd64-openssl.msi
+       dest: C:\Temp\
+       checksum: 4d7158195db823f536ecb481e5ba6bb6db040a4b
+       checksum_algorithm: sha1
+       force: yes
 
-    - name: Install the zabbix Agent
-      win_shell: msiexec /l*v log.txt /i C:\Temp\zabbix_agent-3.0.32-windows-amd64-openssl.msi /qn SERVER="{{ipadd}}"
+        # - name: Install the zabbix Agent
+        #   win_shell: msiexec /l*v log.txt /i C:\Temp\zabbix_agent-3.0.32-windows-amd64-openssl.msi /qn SERVER="{{ipadd}}"
 
-             
+                
